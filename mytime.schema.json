@@ -1,0 +1,238 @@
+/*
+-- WildDog MyTime Schema
+-- mytime.mongodb.txt
+
+-- MongoDB design version
+
+-- Revision 0.1, 24-Jul-2020
+
+-- Ron Patterson, WildDog Design
+
+-- collections document definitions
+*/
+
+{ "$id": "http://buffaloprintworks.com/schemas/mytime.schema.json" }
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/counters",
+    "description": "collection of counters",
+    "type": "object",
+    "required": [ "_id", "seq" ],
+    "properties": {
+        "_id" : { "type": "string" },
+        "seq" : { "type": "integer" }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/lookups",
+    "description": "collection of lookup values",
+    "type": "object",
+    "required": [ "_id", "items" ],
+    "properties": {
+        "_id" : { "type": "string" },
+        "items" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "cd", "descr", "active" ],
+                "properties": {
+                    "cd" : { "type": "string" },
+                    "descr" : { "type": "string" },
+                    "active" : { "type": "string", "enum": [ "y", "n" ] }
+                }
+            }
+        }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/contacts",
+    "description": "collection of contacts",
+    "type": "object",
+    "required": [ "cname", "address", "phone", "type", "active" ],
+    "properties": {
+        "cname" : { "type": "string" },
+        "lname" : { "type": "string" },
+        "fname" : { "type": "string" },
+        "email" : { "type": "array" },
+        "address" : {
+            "properties" : {
+                "number" : { "type": "string" },
+                "street" : { "type": "string" },
+                "city" : { "type": "string" },
+                "state" : { "type": "string" },
+                "zip" : { "type": "string" },
+                "country" : { "type": "string" }
+            }
+        },
+        "phone" : {
+            "properties" : {
+                "work" : { "type": "string" },
+                "cell" : { "type": "string" },
+                "fax" : { "type": "string" }
+            }
+        },
+        "type" : { "type": "string", "maxLength": 1 },
+        "active" : { "type": "string", "enum": [ "y", "n" ] }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/clients",
+    "description": "collection of clients",
+    "type": "object",
+    "required": [ "client_cd", "client_name", "client", "contacts", "active" ],
+    "properties": {
+        "client_cd" : { "type": "string" },
+        "client_name" : { "type": "string" },
+        "client" : { "type": "string" },
+        "contacts" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string" }
+        },
+        "hourly_rate" : { "type": "number" },
+        "mileage_rate" : { "type": "number" },
+        "distance" : { "type": "number" },
+        "mileage_rate" : { "type": "number" },
+        "active" : { "type": "string", "enum": [ "y", "n" ] }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/projects",
+    "description": "collection of projects",
+    "type": "object",
+    "required": [ "client_cd", "client_name", "client", "contacts", "active" ],
+    "properties": {
+        "proj_cd" : { "type": "string" },
+        "client_cd" : { "type": "string" },
+        "name" : { "type": "string" },
+        "po_nbr" : { "type": "string" },
+        "priority" : { "type": "string" },
+        "status" : { "type": "string" },
+        "hourly_rate" : { "type": "number" },
+        "mileage_rate" : { "type": "number" },
+        "distance" : { "type": "number" },
+        "dates" : {
+            "type": "object",
+            "required": [ "entered" ],
+            "properties": {
+                "entered" : { "type": "string", "format": "date-time" },
+                "due" : { "type": "string", "format": "date-time" },
+                "started" : { "type": "string", "format": "date-time" },
+                "completed" : { "type": "string", "format": "date-time" }
+            }
+        },
+        "links" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "url", "entry_dtm" ],
+                "properties": {
+                    "url" : { "type": "string" },
+                    "entry_dtm" : { "type": "string", "format": "date-time" }
+                }
+            }
+        },
+        "notes" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "user_nm", "comments", "entry_dtm" ],
+                "properties": {
+                    "user_nm" : { "type": "string" },
+                    "comments" : { "type": "string" },
+                    "entry_dtm" : { "type": "string", "format": "date-time" }
+                }
+            }
+        },
+        "attachments" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "user_nm", "comments", "entry_dtm" ],
+                "properties": {
+                    "file_name" : { "type": "string" },
+                    "file_size" : { "type": "integer" },
+                    "file_hash" : { "type": "string" },
+                    "entry_dtm" : { "type": "string", "format": "date-time" }
+                }
+            }
+        }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/worklog",
+    "description": "collection of worklog entries",
+    "type": "object",
+    "required": [ "client_cd", "client_name", "client", "contacts", "active" ],
+    "properties": {
+        "proj_cd" : { "type": "string" },
+        "name" : { "type": "string" },
+        "catagory" : { "type": "string" },
+        "kind" : { "type": "string" },
+        "billable" : { "type": "boolean" },
+        "due_date" : { "type": "string", "format": "date-time" },
+        "duration" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "hours", "mins" ],
+                "properties": {
+                    "hours" : { "type": "integer" },
+                    "mins" : { "type": "integer" }
+                }
+            }
+        },
+        "rate" : { "type": "number" },
+        "comments" : { "type": "string" },
+        "log" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "required": [ "start", "end", "comments" ],
+                "properties": {
+                    "start" : { "type": "string", "format": "date-time" },
+                    "end" : { "type": "string", "format": "date-time" },
+                    "comments" : { "type": "string" }
+                }
+            }
+        }
+    }
+}
+
+{
+    "$schema": "http://json-schema.org/schema#",
+    "title": "mytime/users",
+    "description": "collection of users",
+    "type": "object",
+    "required": [ "uid", "lname", "active" ],
+    "properties": {
+        "uid" : { "type": "string" },
+        "lname" : { "type": "string" },
+        "fname" : { "type": "string" },
+        "email" : { "type": "string" },
+        "active" : { "type": "string", "enum": [ "y", "n" ] },
+        "roles" : {
+            "type": "array",
+            "uniqueItems": true,
+            "items": { "type": "string" }
+        },
+        "pw" : { "type": "string" }
+    }
+}

@@ -1,0 +1,445 @@
+<!doctype HTML>
+<html>
+	<head>
+		<title>WDD MyTime</title>
+		<meta name="author" content="Ron Patterson, ASD20">
+		<link type="text/css" rel="stylesheet" href="css/mytime.css" title="bt styles">
+		<link rel="stylesheet" href="//cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+		<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+		<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/jquery-migrate-3.0.0.min.js"></script>
+		<script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+		<script type="text/javascript" charset="utf-8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+		<script type="text/javascript" src="js/mytime.js"></script>
+		<style type="text/css">
+			button:hover { font-weight: bold; }
+		</style>
+	</head>
+	<body background="" bgcolor="#e0e0e0">
+		<div id="header">
+			<table>
+			<tr><td><img src="images/WDD_MyTime.png" alt="WDD MyTime">Powered by <a href="http://www.mongodb.org/"><img src="images/mongodb-logo-web.png" alt="MongoDB" width="144" height="42"></a></td><td width="30">&nbsp;</td>
+			<td valign="middle"><font size="+1"><b>WDD MyTime</b></font></td></tr>
+			</table><br>
+			<input type="hidden" name="usernm" value="Patterson, Ron" id="usernm" />
+			<input type="hidden" name="userid" value="rlpatter" id="userid" />
+			<input type="hidden" name="pid" id="pid" value="">
+			<input type="hidden" name="proj_cd" id="proj_cd" value="">
+		</div>
+
+		<div id="menu">
+			<div id="button_div">
+				<span id="mt_refresh_btn">Projects</span>
+				<span id="mt_clients_btn">Clients</span>
+				<span id="mt_contacts_btn">Contacts</span>
+				<span id="mt_admin_btn">Admin</span>
+				<span id="mt_help_btn">Help</span>
+			</div>
+		</div>
+
+		<div id="maincontent">
+
+			<div id="projects_list" class="content_divs">
+				<p><input type="button" id="mt_add_project_btn" value="Add Project">
+				Click on Show to see details. Click column title to sort.</p>
+				<div style="width: 750px;">
+				<table id="mt_proj_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
+					<thead>
+					<tr>
+					<th>ID</th><th>Name</th><th>Client</th><th>Date entered</th><th>Status</th><th>&nbsp;</th>
+					</tr>
+					</thead>
+				</table>
+				</div>
+			</div>
+
+			<div id="clients_list" class="content_divs">
+				<p><input type="button" id="mt_add_client_btn" value="Add Client">
+				Click on Show to see details. Click column title to sort.</p>
+				<table id="mt_client_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
+					<thead>
+					<tr>
+					<th>Client Name</th><th>Active</th><th>&nbsp;</th>
+					</tr>
+					</thead>
+				</table>
+			</div>
+
+			<div id="contacts_list" class="content_divs">
+				<p><input type="button" id="mt_add_contact_btn" value="Add Contact">
+				Click on Show to see details. Click column title to sort.</p>
+				<table id="mt_contact_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
+					<thead>
+					<tr>
+					<th>Contact Name</th><th>Email Address</th><th>Cell Phone</th><th>Active</th><th>&nbsp;</th>
+					</tr>
+					</thead>
+				</table>
+			</div>
+
+			<div id="users_search" class="content_divs">
+				<form name="form9" id="form9">
+					<h5>You can search on any of the fields listed below. The more
+					information you fill in, the narrower the search becomes.
+					<input type="hidden" name="bid" value=""></h5>
+					<fieldset>
+						<legend>WDD MyTime Assignment Search</legend>
+						<label for="lname">Last Name:</label>
+						<div class="fields2"><input type="text" name="lname" id="lname" size="22"></div><br class="clear">
+						<label for="fname">First Name:</label>
+						<div class="fields2"><input type="text" name="fname" id="fname" size="22"></div><br class="clear">
+						<label>&nbsp;</label>
+						<div class="fields2"><input type="submit" name="find" value="Start Search">
+						<input type="reset"></div><br class="clear">
+						<table id="user_assign_tbl" class="display" border="1" cellspacing="0" cellpadding="2" width="100%">
+							<thead>
+							<tr>
+							<th>UID</th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Roles</th>
+							<th>Act</th>
+							<th>&nbsp;</th>
+							</tr>
+							</thead>
+						</table>
+					</fieldset>
+				</form>
+			</div>
+
+			<div id="contact_show" class="content_divs">
+				<div id="contactshow_div" class="contactform">
+					<fieldset>
+						<legend>WDD MyTime Contact Record</legend>
+						<label>Name:</label>
+						<div class="fields2"><span id="cname_v"></span></div><br class="clear">
+						<label>Last Name:</label>
+						<div class="fields2"><span id="lname_v"></span></div><br class="clear">
+						<label>First Name:</label>
+						<div class="fields2"><span id="fname_v"></span></div><br class="clear">
+						<label>Email Address:</label>
+						<div class="fields2"><span id="email_v"></span></div><br class="clear">
+						<fieldset>
+							<legend>Address</legend>
+							<label>Number:</label>
+							<div class="fields2"><span id="addr_number_v"></span></div><br class="clear">
+							<label>Street:</label>
+							<div class="fields2"><span id="addr_street_v"></span></div><br class="clear">
+							<label>City:</label>
+							<div class="fields2"><span id="addr_city_v"></span></div><br class="clear">
+							<label>State:</label>
+							<div class="fields2"><span id="addr_state_v"></span></div><br class="clear">
+							<label>Zip Code:</label>
+							<div class="fields2"><span id="addr_zip_v"></span></div><br class="clear">
+							<label>Country:</label>
+							<div class="fields2"><span id="addr_country_v"></span></div><br class="clear">
+						</fieldset>
+						<fieldset>
+							<legend>Phone</legend>
+							<label>Work:</label>
+							<div class="fields2"><span id="addr_work_v"></span></div><br class="clear">
+							<label>Cell:</label>
+							<div class="fields2"><span id="addr_cell_v"></span></div><br class="clear">
+							<label>Fax:</label>
+							<div class="fields2"><span id="addr_fax_v"></span></div><br class="clear">
+						</fieldset>
+						<label>Active:</label>
+						<div class="fields2"><span id="active_v"></span></div><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="cedtm_v"></span></div><br class="clear">
+						<label>Update Date/Time:</label>
+						<div class="fields2"><span id="cudtm_v"></span></div><br class="clear">
+					</fieldset>
+					<br>
+					<div align="center" id="contact_show_buttons">
+						<span onclick="return wdb.edit_contact(event);">Edit Contact</span>
+						<span onclick="return wdb.delete_contact(event);">Delete Contact</span>
+					</div>
+				</div>
+			</div>
+
+			<div id="contact_edit" class="content_divs">
+				<div id="contactedit_div" class="contactform">
+					<form name="contact_form1" id="contactedit_form1"><br>
+					<input type="hidden" name="id" id="contact_id" value="">
+					<fieldset>
+						<legend>WDD MyTime Contact Record</legend>
+						<label>Name:</label>
+						<div class="fields2"><span id="cname"></span></div><br class="clear">
+						<label for="lname"><span class="required">*</span>Last Name:</label>
+						<div class="fields2"><input type="text" name="lname" size="35" value=""></div><br class="clear">
+						<label for="fname">First Name:</label>
+						<div class="fields2"><input type="text" name="fname" size="35" value=""></div><br class="clear">
+						<label for="email"><span class="required">*</span>Email Address:</label>
+						<div class="fields2"><input type="text" name="email" size="35" value=""></div><br class="clear">
+						<fieldset>
+							<legend>Address</legend>
+							<label for="addr_number">Number:</label>
+							<div class="fields2"><input type="text" name="addr_number" size="6" value=""></div><br class="clear">
+							<label for="addr_street">Street:</label>
+							<div class="fields2"><input type="text" name="addr_street" size="35" value=""></div><br class="clear">
+							<label for="addr_city">City:</label>
+							<div class="fields2"><input type="text" name="addr_city" size="20" value=""></div><br class="clear">
+							<label for="addr_state">State:</label>
+							<div class="fields2"><input type="text" name="addr_state" size="20" value=""></div><br class="clear">
+							<label for="addr_zip">Zip Code:</label>
+							<div class="fields2"><input type="text" name="addr_zip" size="10" value=""></div><br class="clear">
+							<label for="addr_country">Country:</label>
+							<div class="fields2"><input type="text" name="addr_country" size="10" value=""></div><br class="clear">
+						</fieldset>
+						<fieldset>
+							<legend>Phone</legend>
+							<label for="work">Work:</label>
+							<div class="fields2"><input type="text" name="work" size="15" value=""></div><br class="clear">
+							<label for="cell">Cell:</label>
+							<div class="fields2"><input type="text" name="cell" size="15" value=""></div><br class="clear">
+							<label for="fax">Fax:</label>
+							<div class="fields2"><input type="text" name="fax" size="15" value=""></div><br class="clear">
+						</fieldset>
+						<label>Active</label><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="cedtm"></span></div><br class="clear">
+						<label>Update Date/Time:</label>
+						<div class="fields2"><span id="cudtm"></span></div><br class="clear">
+					</fieldset>
+					<label>&nbsp;</label>
+					<div class="fields2"><input type="submit" value="SAVE"> <input
+			 type="button" id="contact_edit_cancel" value="Cancel"></div><br class="clear">
+					</form>
+					<br>
+					<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
+					<div id="mt_contactedit_errors"></div>
+				</div>
+			</div>
+
+			<div id="project_show_edit" class="content_divs">
+				<div id="projshow_div" class="projform content_divs">
+					<fieldset>
+						<legend>WDD MyTime Project Record</legend>
+						<label>ID:</label>
+						<div class="fields2"><span id="proj_cd2_v"></span></div><br class="clear">
+						<label>Client:</label>
+						<div class="fields2"><span id="client_v"></span></div><br class="clear">
+						<label>Name:</label>
+						<div class="fields2"><span id="name_v"></span></div><br class="clear">
+						<label>PO Number:</label>
+						<div class="fields2"><span id="po_nbr_v"></span></div><br class="clear">
+						<label>Priority:</label>
+						<div class="fields2"><span id="priority_v"></span></div><br class="clear">
+						<label>Status:</label>
+						<div class="fields2"><span id="status_v"></span></div><br class="clear">
+						<label>Hourly Rate:</label>
+						<div class="fields2"><span id="hourly_rate_v"></span></div><br class="clear">
+						<label>Mileage Rate:</label>
+						<div class="fields2"><span id="mileage_rate_v"></span></div><br class="clear">
+						<label>Distance:</label>
+						<div class="fields2"><span id="distance_v"></span></div><br class="clear">
+						<label>Attachments:</label>
+						<div class="fields2"><div id="filesDiv"></div> <input type="button" id="assign_btn1" value="Attach File" onclick="return bt.attach_file();"></div><br class="clear">
+						<label>Links:</label>
+						<div class="fields2"><div id="linksDiv"></div> <input type="button" id="links_btn1" value="Add Link" onclick="return bt.add_link();"></div><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="edtm_v"></span></div><br class="clear">
+						<label>Due Date/Time:</label>
+						<div class="fields2"><span id="ddtm_v"></span></div><br class="clear">
+						<label>Started Date/Time:</label>
+						<div class="fields2"><span id="sdtm_v"></span></div><br class="clear">
+						<label>Completed Date/Time:</label>
+						<div class="fields2"><span id="cdtm_v"></span></div><br class="clear">
+					</fieldset>
+					<br>
+					<div align="center" id="show_buttons">
+						<span onclick="return wdb.edit_project(event);">Edit Project</span>
+						<span onclick="return wdb.delete_project(event);">Delete Project</span>
+						<span onclick="return wdb.show_email(event);">Email Project</span>
+						<span onclick="return wdb.add_proj_notes(event);">Add Notes</span>
+					</div>
+					<br>
+					<fieldset>
+					<legend>Project Worklog</legend>
+					<div id="worklog_div"></div>
+					</fieldset>
+				</div>
+
+				<div id="projedit_div" class="projform content_divs" style="text-align: left; width: 580px;">
+					<form name="proj_form1" id="projedit_form1"><br>
+					<input type="hidden" name="oldstatus" id="oldstatus" value="">
+					<fieldset>
+						<legend> WDD MyTime Project Record </legend>
+						<label>ID:</label>
+						<div class="fields2"><span id="bugedit_id"></span></div><br class="clear">
+						<label for="group"><span class="required">*</span>Client:</label>
+						<div class="fields2"><span id="client"></span></div><br class="clear">
+						<label for="name"><span class="required">*</span>Name:</label>
+						<div class="fields2"><input type="text" name="name" size="35" value=""></div><br class="clear">
+						<label for="po_nbr"><span class="required">*</span>PO Number:</label>
+						<div class="fields2"><input type="text" name="po_nbr" size="20" value=""></div><br class="clear">
+						<label for="priority"><span class="required">*</span>Priority:</label>
+						<div class="fields2"><span id="priority_s"></span></div><br class="clear">
+						<label for="status">Status:</label>
+						<div class="fields2"><span id="status_s"></span></div><br class="clear">
+						<label for="hourly_rate"><span class="required">*</span>Hourly Rate:</label>
+						<div class="fields2"><input type="text" name="hourly_rate" size="10" value=""></div><br class="clear">
+						<label for="mileage_rate"><span class="required">*</span>Mileage Rate:</label>
+						<div class="fields2"><input type="text" name="mileage_rate" size="10" value=""></div><br class="clear">
+						<label for="distance"><span class="required">*</span>Distance:</label>
+						<div class="fields2"><input type="text" name="distance" size="10" value=""></div><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="edtm" class="date"></span></div><br class="clear">
+						<label>Due Date/Time:</label>
+						<div class="fields2"><span id="ddtm" class="date"></span></div><br class="clear">
+						<label>Started Date/Time:</label>
+						<div class="fields2"><span id="sdtm" class="date"></span></div><br class="clear">
+						<label>Completed Date/Time:</label>
+						<div class="fields2"><span id="cdtm" class="date"></span></div><br class="clear">
+						<label>&nbsp;</label>
+						<div class="fields2"><input type="submit" value="SAVE"> <input
+				 type="button" id="proj_edit_cancel" value="Cancel"></div><br class="clear">
+					</fieldset>
+					</form>
+					<br>
+					<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
+					<div id="mt_projedit_errors"></div>
+				</div>
+			</div>
+
+			<div id="worklog_form" class="projform content_divs">
+				<form id="form2" name="form2" method="post"><br>
+				<fieldset>
+					<legend>WDD MyTime Worklog Record</legend>
+					<label>ID:</label>
+					<div class="fields2"><span id="wl_bug_id"></span></div><br class="clear">
+					<label>Description:</label>
+					<div class="fields2"><span id="wl_descr"></span></div><br class="clear">
+					<label>Bug Comments:</label>
+					<div class="fields2"><span id="bug_comments"></span></div><br class="clear">
+					<label>Public:</label>
+					<div class="fields2"><label class="yesno"><input type="radio" name="wl_public" value="y">Yes</label> <label class="yesno"><input type="radio" name="wl_public" value="n">No</label></div><br class="clear">
+					<label for="comments"><span class="required">*</span>Worklog Comments:</label>
+					<div class="fields2"><textarea name="wl_comments" rows="10" cols="40" wrap="virtual"></textarea></div><br class="clear">
+					<label>Entry By:</label>
+					<div class="fields2"><span id="wl_ename"></span></div><br class="clear">
+					<label>Bug Entry Date/Time:</label>
+					<div class="fields2"><span id="wl_entry_dtm"></span></div><br class="clear">
+					<label>&nbsp;</label>
+					<div class="fields2"><input type="submit" value="SAVE"> <input type="button" id="cancel2" value="Cancel"></div><br class="clear">
+				</fieldset>
+				</form>
+				<br>
+				<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
+				<div id="wl_errors"></div>
+			</div>
+
+			<div id="email_div" class="projform content_divs">
+				<form name="project_email_form" id="project_email_form"><br>
+				<fieldset>
+					<legend>WDD MyTime Record</legend>
+					<label>ID:</label>
+					<div class="fields2"><span id="bug_id_email"></span></div><br class="clear">
+					<label>Description:</label>
+					<div class="fields2"><span id="descr_email"></span></div><br class="clear">
+					<label for="sendto">Send to:</label>
+					<div class="fields2"><input type="text" name="sendto" size="40"></div><br class="clear">
+					<label for="cc">Send copy to (CC):</label>
+					<div class="fields2"><input type="text" name="cc" size="40"></div><br class="clear">
+					<label for="subject">Subject:</label>
+					<div class="fields2"><input type="text" name="subject" size="40" value="bug_id - descr"></div><br class="clear">
+					<label for="msg2">Message to add:</label>
+					<div class="fields2"><textarea name="msg2" rows="3" cols="40" wrap="virtual"></textarea></div><br class="clear">
+					<label>&nbsp;</label>
+					<div class="fields2"><input type="submit" value="Send Bug Message"> <input type="reset"></div><br class="clear">
+				</fieldset>
+				</form>
+				<div id="email_errors"></div>
+			</div>
+
+			<div id="mt_admin" class="content_divs">
+				<div id="mt_admin_head" class="mtform">
+					Select Admin Section:
+					<span id="mt_admin_types">
+						<select></select>
+					</span>
+				</div>
+
+				<div id="mt_lu_list" class="mtform mtadmin content_divs">
+					<input type="button" id="mt_admin_lu_add" value="Add Entry">
+					<table id="mt_lu_tbl" class="display" border="1" cellspacing="0" cellpadding="2">
+						<thead>
+						<tr>
+						<th>Code</th>
+						<th>Description</th>
+						<th>Active</th>
+						<th>&nbsp;</th>
+						</tr>
+						</thead>
+					</table>
+				</div>
+
+				<div id="mt_lu_form" class="mtform mtadmin content_divs">
+					<fieldset>
+						<legend>Lookup Add/Edit</legend>
+						<form name="mt_lu_form" id="mt_lu_form_id">
+						<table id="mt_lu_tbl2" border="0" cellspacing="0" cellpadding="2">
+						<tr><th align="right">Code</th><td><input type="text" name="cd" size="20"></td></tr>
+						<tr><th align="right">Description</th><td><input type="text" name="descr" size="40" value=""></td></tr>
+						<tr><th align="right">Active</th><td><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label></td></tr>
+						</table>
+						<input type="submit" value="Save">
+						<input type="button" id="mt_lu_save_cancel" value="Cancel">
+						<input type="hidden" name="lu_type" value="">
+						<input type="hidden" name="lu_action" value="add">
+						</form>
+					</fieldset>
+					<div id="mt_lu_errors"></div>
+				</div>
+
+				<div id="mt_users_list" class="mtform mtadmin content_divs">
+					<input type="button" id="mt_admin_users_add" value="Add User">
+					<table id="mt_user_tbl" class="display" border="1" cellspacing="0" cellpadding="2">
+						<thead>
+						<tr>
+						<th>UID</th>
+						<th>Name</th>
+						<th>Email</th>
+						<th>Roles</th>
+						<th>Act</th>
+						<th>&nbsp;</th>
+						</tr>
+						</thead>
+					</table>
+				</div>
+
+				<div id="mt_users_form" class="mtform mtadmin content_divs">
+					<fieldset>
+						<legend>User Add/Edit</legend>
+						<form name="mt_user_form" id="mt_user_form_id">
+						<table id="user_tbl2" border="0" cellspacing="0" cellpadding="2">
+						<tr><th align="right">UID</th><td><input type="text" name="uid1" size="20"></td></tr>
+						<tr><th align="right">Last Name</th><td><input type="text" name="lname" value=""></td></tr>
+						<tr><th align="right">First Name</th><td><input type="text" name="fname" value=""></td></tr>
+						<tr><th align="right">Email</th><td><input type="text" name="email" size="40" value=""></td></tr>
+						<tr><th align="right">Password</th><td><input type="password" name="pw" value=""><input type="hidden" name="pw2" value=""></td></tr>
+						<tr><th align="right">Active</th><td><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label></td></tr>
+						<tr><th align="right">Roles</th><td><label class="yesno"><input type="radio" name="roles"   value="admin">Admin</label> <label class="yesno"><input type="radio" name="roles"  value="ro">RO</label> <label class="yesno"><input type="radio" name="roles"  value="user">User</label></td></tr>
+						<tr><th align="right">Group</th><td><div id="groups"></div></td></tr>
+						</table>
+						<input type="submit" value="Save">
+						<input type="button" id="mt_user_edit_cancel" value="Cancel">
+						<input type="hidden" name="uid" value="">
+						<input type="hidden" name="id" value="">
+						</form>
+					</fieldset>
+					<div id="mt_admin_errors"></div>
+				</div>
+			</div>
+
+			<div id="mthelp_div" class="content_divs">
+				<p>TBA - Some help info</p>
+			</div>
+
+			<br><br><div align="center"><address><span style="font-size: 11pt;">Copyright &copy;2020, WildDog Design</span></address></div>
+
+		</div>
+
+	</body>
+</html>
