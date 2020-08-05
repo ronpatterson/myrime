@@ -107,8 +107,9 @@
 				</form>
 			</div>
 
-			<div id="contact_show" class="content_divs">
+			<div id="contact_show_edit" class="content_divs">
 				<div id="contactshow_div" class="contactform">
+					<input type="hidden" name="id" id="cid" value="">
 					<fieldset>
 						<legend>WDD MyTime Contact Record</legend>
 						<label>Name:</label>
@@ -156,9 +157,7 @@
 						<span onclick="return wdb.delete_contact(event);">Delete Contact</span>
 					</div>
 				</div>
-			</div>
 
-			<div id="contact_edit" class="content_divs">
 				<div id="contactedit_div" class="contactform">
 					<form name="contact_form1" id="contactedit_form1"><br>
 					<input type="hidden" name="id" id="contact_id" value="">
@@ -196,7 +195,7 @@
 							<label for="fax">Fax:</label>
 							<div class="fields2"><input type="text" name="fax" size="15" value=""></div><br class="clear">
 						</fieldset>
-						<label>Active</label><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label><br class="clear">
+						<label>Active:</label><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label><br class="clear">
 						<label>Entry Date/Time:</label>
 						<div class="fields2"><span id="cedtm"></span></div><br class="clear">
 						<label>Update Date/Time:</label>

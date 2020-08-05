@@ -341,6 +341,7 @@ var wdb = // setup the wdb namespace
 			wdb.contactshowdialog(event,data._id);
 		} );
 		$('#projects_list').hide();
+		$('#clients_list').hide();
 		$('#contacts_list').show();
 		return false;
 	},
@@ -396,6 +397,95 @@ var wdb = // setup the wdb namespace
 	{
 		//alert('mt_proj_cancel');
 		$('#contact_edit').dialog('close');
+		return false;
+	},
+
+	contactshowdialog: function ( event, id )
+	{
+		wdb.showDialogDiv('WDD MyTime Contact','contact_show_edit');
+		wdb.contactshow(event,id);
+		return false;
+	},
+
+	contactshow: function ( event, id )
+	{
+		//alert(id);
+		//var id2 = parseInt(id.replace(/[^\d]/g,''));
+		var params = "action=show&id="+id;
+		$.ajax({
+			url: 'mt_get_contact',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//console.log(data);
+			wdb.proj_doc = data;
+			$('#mt_contact_show').dialog('option','title','WDD MyTime Contact '+data.mt_id);
+			$('#cname_v').html(data.cname);
+			$('#lname_v').html(data.lname);
+			$('#fname_v').html(data.fname);
+			$('#cid').val(id);
+			$('#email_v').html(data.email);
+			$('#addr_number_v').html(data.address.number);
+			$('#addr_street_v').html(data.address.street);
+			$('#addr_city_v').html(data.address.city);
+			$('#addr_state_v').html(data.address.state);
+			$('#addr_zip_v').html(data.address.zip);
+			$('#addr_country_v').html(data.address.country);
+			$('#addr_work_v').html(data.phone.work);
+			$('#addr_cell_v').html(data.phone.cell);
+			$('#addr_fax_v').html(data.phone.fax);
+			$('input[name="active"]').removeAttr('checked');
+			if (data.active == 'y') $('input[name="active"][value="y"]').prop('checked',true);
+			else $('input[name="active"][value="n"]').prop('checked',true);
+			$('#cedtm_v').html(data.edtm);
+			$('#cudtm_v').html(data.udtm);
+			$('#contactshow_div').show();
+			$('#contactedit_div').hide();
+		});
+		return false;
+	},
+
+	edit_contact: function ( event, id )
+	{
+		var id2 = $('#cid').val();
+		if (id) id2 = id;
+		//alert('edit_proj '+id2);
+		var params = "action=edit&id="+id2;
+		$.ajax({
+			url: 'mt_get_contact',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//$('#content_div').html(response);
+			//$('#mtshow_div').dialog('close');
+			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
+			$('#mt_contactedit_errors').html('');
+			$('#mtedit_id').html(data.mt_id);
+			$('input[name="cname"]').html(data.cname);
+			$('input[name="lname"]').val(data.lname);
+			$('input[name="fname"]').val(data.fname);
+			$('input[name="email"]').val(data.email);
+			$('input[name="addr_number"]').val(data.address.number);
+			$('input[name="addr_street"]').val(data.address.street);
+			$('input[name="addr_city"]').val(data.address.city);
+			$('input[name="addr_state"]').val(data.address.state);
+			$('input[name="addr_zip"]').val(data.address.zip);
+			$('input[name="addr_country"]').val(data.address.country);
+			$('input[name="work"]').val(data.phone.work);
+			$('input[name="cell"]').val(data.phone.cell);
+			$('input[name="fax"]').val(data.phone.fax);
+			$('input[name="active"]').removeAttr('checked');
+			if (data.active == 'y') $('input[name="active"][value="y"]').prop('checked',true);
+			else $('input[name="active"][value="n"]').prop('checked',true);
+			$('#cedtm').html(data.edtm);
+			$('#cudtm').html(data.udtm);
+			$('#contactshow_div').hide();
+			$('#contactedit_div').show();
+		});
 		return false;
 	},
 
@@ -836,7 +926,7 @@ var wdb = // setup the wdb namespace
           wdb.mtadmin_lu_show(event,type,data.cd);
       } );
 		});
-		wdb.hideview_content($('#mt_lu_list'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_lu_list'),$('#mt_admin'));
 		return false;
 	},
 
@@ -850,7 +940,7 @@ var wdb = // setup the wdb namespace
 		$('input[name="active"][value="y"]').prop('checked',true);
     $('input[name="lu_type"]').val($('#mt_admin_types select').val());
     $('input[name="lu_action"]').val('add');
-		wdb.hideview_content($('#mt_lu_form'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_lu_form'),$('#mt_admin'));
 	},
 
 	mtadmin_lu_show: function ( event, type, cd )
@@ -885,7 +975,7 @@ var wdb = // setup the wdb namespace
 			$('input[name="lu_type"]').val(type);
 			$('input[name="lu_action"]').val('change');
 		});
-		wdb.hideview_content($('#mt_lu_form'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_lu_form'),$('#mt_admin'));
 		return false;
 	},
 
@@ -928,7 +1018,7 @@ var wdb = // setup the wdb namespace
 
 	lu_save_cancel: function( event )
 	{
-		wdb.hideview_content($('#mt_lu_list'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_lu_list'),$('#mt_admin'));
 		return false;
 	},
 
@@ -966,7 +1056,7 @@ var wdb = // setup the wdb namespace
           wdb.user_show(event,data.uid);
       } );
 		});
-		wdb.hideview_content($('#mt_users_list'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_users_list'),$('#mt_admin'));
 		return false;
 	},
 
@@ -986,7 +1076,7 @@ var wdb = // setup the wdb namespace
 		$('input[name="roles"]').removeAttr('checked');
 		$('input[name="roles"][value="user"]').prop('checked',true);
 		$('#mt_users_form').show();
-		wdb.hideview_content($('#mt_users_form'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_users_form'),$('#mt_admin'));
 	},
 
 	user_show: function ( event, uid )
@@ -1022,13 +1112,13 @@ var wdb = // setup the wdb namespace
 			$('input[name="pw"]').val(data.pw);
 			$('input[name="pw2"]').val(data.pw);
 		});
-		wdb.hideview_content($('#mt_users_form'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_users_form'),$('#mt_admin'));
 		return false;
 	},
 
 	user_edit_cancel: function( event )
 	{
-		wdb.hideview_content($('#mt_users_list'),$('$mt_admin'));
+		wdb.hideview_content($('#mt_users_list'),$('#mt_admin'));
 		return false;
 	},
 
@@ -1197,7 +1287,7 @@ var wdb = // setup the wdb namespace
 		// hide content divs and show specified
 		$('.content_divs').hide();
 		div.show();
-		if (typeof(div2) == 'undefined') div2.show();
+		if (typeof(div2) != 'undefined') div2.show();
 		return false;
 	},
 
@@ -1219,6 +1309,7 @@ var wdb = // setup the wdb namespace
 		$('#mt_help_btn').on('click',wdb.mthelp);
 		$('#projedit_form1').on('submit',wdb.mt_proj_handler);
 		$('#proj_edit_cancel').on('click',wdb.mt_projedit_cancel);
+		$('#contactshow_form').on('submit',wdb.mt_contactshow_handler);
 		$('#contactedit_form1').on('submit',wdb.mt_contactedit_handler);
 		$('#contact_edit_cancel').on('click',wdb.mt_contactedit_cancel);
 		$('#mt_form2').on('submit',wdb.workloghandler);
@@ -1229,6 +1320,7 @@ var wdb = // setup the wdb namespace
 		$('#mt_lu_save_cancel').on('click',wdb.lu_save_cancel);
 		$('#mt_user_form_id').on('submit',wdb.userhandler);
 		$('#mt_user_edit_cancel').on('click',wdb.user_edit_cancel);
+		$('#contact_show_buttons span').button();
 		$('#mt_show_buttons span').button();
 		$('#mt_admin_btn').show();
 		var params = 'action=mt_init';
@@ -1240,6 +1332,7 @@ var wdb = // setup the wdb namespace
 		}).done(function (data)
 		{
 			//console.log(data);
+			// setup verious selection lists
 			wdb.group_data = data;
 			var sel = wdb.build_selection('mt_type',data.mt_type);
 			$('#btypes_s').empty().append(sel);
