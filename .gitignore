@@ -6,4 +6,3 @@
 .*
 !.gitignore
 node_modules
-mytime

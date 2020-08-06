@@ -348,9 +348,9 @@ var wdb = // setup the wdb namespace
 
 	mtcontactadd: function ( event )
 	{
-		wdb.showDialogDiv('WDD MyTime Contact Add','contact_edit');
+		wdb.showDialogDiv('WDD MyTime Contact Add','contact_show_edit');
 		$('#mt_contactedit_errors').html('');
-		$('#contact_id').html('');
+		$('#contact_id').val('');
 		$('#contactedit_form1 input[type="text"]').val('');
 		//$('#euser').html(wdb.login_content.uid);
 		$('#addr_country').html('USA');
@@ -358,7 +358,9 @@ var wdb = // setup the wdb namespace
 		$('input[name="active"][value="y"]').prop('checked',true);
 		$('#cedtm').html('');
 		$('#uedtm').html('');
-		wdb.hideview_content($('#contact_edit'));
+		wdb.hideview_content($('#contact_show_edit'));
+		$('#contactshow_div').hide();
+		$('#contactedit_div').show();
 		return false;
 	},
 
@@ -383,7 +385,7 @@ var wdb = // setup the wdb namespace
 		{
 			if (/^SUCCESS/.test(response))
 			{
-				$('#contact_edit').dialog('close');
+				$('#contact_show_edit').dialog('close');
 				wdb.mtcontacts(event);
 				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
 			}
@@ -396,7 +398,7 @@ var wdb = // setup the wdb namespace
 	mt_contactedit_cancel: function( event )
 	{
 		//alert('mt_proj_cancel');
-		$('#contact_edit').dialog('close');
+		$('#contact_show_edit').dialog('close');
 		return false;
 	},
 
@@ -464,8 +466,8 @@ var wdb = // setup the wdb namespace
 			//$('#mtshow_div').dialog('close');
 			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
 			$('#mt_contactedit_errors').html('');
-			$('#mtedit_id').html(data.mt_id);
-			$('input[name="cname"]').html(data.cname);
+			$('#contact_id').val(data._id);
+			$('#cname').html(data.cname);
 			$('input[name="lname"]').val(data.lname);
 			$('input[name="fname"]').val(data.fname);
 			$('input[name="email"]').val(data.email);
@@ -486,6 +488,36 @@ var wdb = // setup the wdb namespace
 			$('#contactshow_div').hide();
 			$('#contactedit_div').show();
 		});
+		return false;
+	},
+
+	delete_contact: function ( event )
+	{
+		if (!confirm("Really delete this entry?")) return false;
+		var params = 'action=delete';
+		params += '&id='+$('#cid').val();
+		$.ajax({
+			url: 'contact_delete',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#contact_show_edit').dialog('close');
+				wdb.mt_contacts_list(event);
+			}
+			else
+				alert(response);
+		});
+		return false;
+	},
+
+	mt_contact_cancel: function( event )
+	{
+		$('#contactshow_div').show();
+		$('#contactedit_div').hide();
 		return false;
 	},
 
