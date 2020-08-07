@@ -190,6 +190,41 @@ module.exports = function() {
             }
         },
 
+		delete_contact: (db, req, res) => {
+			console.log(req.body); res.end('SUCCESS'); return;
+			var id = req.body.id;
+			var cname = req.body.cname;
+			// check for link to clients
+			db.collection('clients')
+			.findOne(
+				{ '$or': [ { 'client': id }, { 'contacts': { '$all': [ id ] } } ] },
+				(err, client) => {
+					if (client)
+					{
+						assert.equal(null, err);
+						console.log(cname + " linked in the clients collection.");
+						//console.log(result);
+						res.send('FAIL ' + cname + ' found in clients!');
+						res.end();
+						return false;
+					}
+					else { // good to go
+						db.collection('contacts')
+						.removeOne(
+						{ '_id': new ObjectId(id) },
+						(err, result) => {
+							  assert.equal(err, null);
+							  console.log("Removed document from the contacts collection.");
+							  //console.log(result);
+							  res.send('SUCCESS');
+							  res.end();
+							}
+						);
+					}
+				}
+			);
+		},
+
         delete_proj: (db, req, res) => {
 			console.log(req.body); res.end('SUCCESS'); return;
 			var id = req.body.id;
@@ -224,10 +259,10 @@ module.exports = function() {
 				//console.log(results);
 				res.json(results);
 				res.end();
-				});
-			},
+			});
+		},
 
-				get_contact: (db, req, res) => {
+		get_contact: (db, req, res) => {
             var id = req.query.id;
             db.collection('contacts')
             .findOne(
@@ -310,7 +345,7 @@ module.exports = function() {
 					{ 'cname': cname },
 					(err, contact) => {
 						assert.equal(null, err);
-						console.log('read',contact);
+						//console.log('read',contact);
 						if (contact && contact._id != id)
 						{
 							console.log(cname + " already in the contacts collection (2).");
@@ -346,6 +381,111 @@ module.exports = function() {
 					}
 				);
             }
+        },
+
+		clients_list: (db, req, res) => {
+			//console.log('clients_list',req);
+			var results = [];
+			var crit = {};
+			// link to client contact
+			db.collection('clients').aggregate([
+				{ '$match': crit },
+				{ '$sort': {'name':1} },
+			    { '$lookup':
+					{
+						from: 'contacts',
+						localField: 'client',
+						foreignField: '_id',
+						as: 'contact_info'
+					}
+		       }
+		   ]).toArray( (err, res2) => {
+				res2.forEach( (doc) => {
+					//console.log('client:',doc);
+					//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
+					//doc.status = getWDDlookup("status",doc.status);
+					doc.cname = doc.contact_info[0].cname;
+					results.push(doc);
+				});
+				results = {'data':results};
+				console.log('results:',results);
+				res.json(results);
+				res.end();
+			});
+		},
+
+		client_add_update: (db, req, res, next) => {
+            // client_cd, client_name, client, contacts, hourly_rate, mileage_rate, distance, active
+            //console.log('add/edit',req.body); res.end('TEST'); return;
+			var client_cd = req.body.client_cd;
+			// check action
+            if (req.body.id == '') { // add
+				// check for duplicate
+				db.collection('clients')
+	            .findOne(
+	                { 'client_cd': client_cd },
+	                (err, client) => {
+						if (client && client._id != id)
+						{
+		                    assert.equal(null, err);
+		                    console.log(client_cd + " already in the clients collection.");
+		                    //console.log(result);
+		                    res.send('FAIL ' + client_cd + ' already exist!');
+		                    res.end();
+							return false;
+	                	}
+						else {
+							var doc = {
+  "client_cd": client_cd
+, "client_name": req.body.client_name
+, "client": req.body.client
+, "contacts": req.body.contacts_ids
+, "hourly_rate": req.body.hourly_rate
+, "mileage_rate": req.body.mileage_rate
+, "distance": req.body.distance
+, "active": req.body.active
+, "entry_dtm": new Date()
+};
+			                var rec = db.collection('clients')
+			                .insertOne(
+			                    doc,
+			                    (err, result) => {
+			                        assert.equal(err, null);
+			                        console.log("Inserted a document into the clients collection.");
+			                        //console.log(result);
+			                        res.send('SUCCESS');
+			                        res.end();
+			                    }
+			                );
+						}
+					}
+            	);
+            }
+            else { // update
+				var id = req.body.id;
+				var doc = {
+  "client_name": req.body.client_name
+, "client": req.body.client_id
+, "contacts": req.body.contacts_ids
+, "hourly_rate": req.body.hourly_rate
+, "mileage_rate": req.body.mileage_rate
+, "distance": req.body.distance
+, "active": req.body.active
+, "entry_dtm": new Date()
+};
+                var rec = db.collection('contacts')
+                .updateOne(
+                    { '_id': new ObjectId(id) },
+                    { '$set': doc },
+                    (err, result) => {
+                        assert.equal(err, null);
+						console.log("Updated a document into the contacts collection.");
+                        //console.log(result);
+                        res.send('SUCCESS');
+                        res.end();
+                    }
+                );
+			}
         },
 
         worklog_add: (db, req, res, next) => {

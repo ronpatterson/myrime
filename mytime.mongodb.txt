@@ -53,13 +53,15 @@ db.contacts {
 db.clients {
     "_id" : ObjectId,
     "client_cd" : string,
-    "client_name" " string,
+    "client_name : string,
     "client" : ObjectId, // contacts
     "contacts" : [ ObjectId,... ], // contacts
     "hourly_rate" : decimal,
     "mileage_rate" : decimal,
     "distance" : decimal,
-    "active" : char // y/n
+    "active" : char, // y/n
+    "entry_dtm" : ISODate,
+    "update_dtm" : ISODate
 }
 
 db.projects {
@@ -108,13 +110,9 @@ db.worklog {
         "hours": int,
         "mins" : int
     },
-    "rate" : number,
-    "comments": string,
-    "log" : [{ // array
-        "start" : ISODate,
-        "end" : ISODate,
-        "comments" : string
-    }]
+    "start_dtm" : ISODate,
+    "end_dtm" : ISODate,
+    "comments" : string
 }
 
 db.users {

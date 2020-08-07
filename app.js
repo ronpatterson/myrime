@@ -102,8 +102,24 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 		//console.log('Lookups loaded');
 	});
 
-	app.get('/mt_client_list', function(req, res) {
-		wdb.client_list(db, req, res);
+	app.get('/mt_contacts_list', function(req, res) {
+		wdb.contacts_list(db, req, res);
+	});
+
+	app.get('/mt_get_contact', function(req, res) {
+		wdb.get_contact(db, req, res);
+	});
+
+	app.post('/mt_add_update_contact', function(req, res, next) {
+		wdb.contact_add_update(db, req, res, next);
+	});
+
+	app.post('/mt_delete_contact', function(req, res) {
+		wdb.delete_contact(db, req, res);
+	});
+
+	app.get('/mt_clients_list', function(req, res) {
+		wdb.clients_list(db, req, res);
 	});
 
 	app.get('/mt_get_client', function(req, res) {
@@ -111,7 +127,7 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 	});
 
 	app.post('/mt_add_update_client', function(req, res, next) {
-		wdb.add_update_client(db, req, res, next);
+		wdb.client_add_update(db, req, res, next);
 	});
 
 	app.post('/mt_delete_client', function(req, res) {
@@ -132,18 +148,6 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 
 	app.post('/mt_delete_proj', function(req, res) {
 		wdb.delete_proj(db, req, res);
-	});
-
-	app.get('/mt_contacts_list', function(req, res) {
-		wdb.contacts_list(db, req, res);
-	});
-
-	app.get('/mt_get_contact', function(req, res) {
-		wdb.get_contact(db, req, res);
-	});
-
-	app.post('/mt_add_update_contact', function(req, res, next) {
-		wdb.contact_add_update(db, req, res, next);
 	});
 
 	app.post('/worklog_add', function(req, res, next) {

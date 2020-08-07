@@ -53,18 +53,6 @@
 				</div>
 			</div>
 
-			<div id="clients_list" class="content_divs">
-				<p><input type="button" id="mt_add_client_btn" value="Add Client">
-				Click on Show to see details. Click column title to sort.</p>
-				<table id="mt_client_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
-					<thead>
-					<tr>
-					<th>Client Name</th><th>Active</th><th>&nbsp;</th>
-					</tr>
-					</thead>
-				</table>
-			</div>
-
 			<div id="contacts_list" class="content_divs">
 				<p><input type="button" id="mt_add_contact_btn" value="Add Contact">
 				Click on Show to see details. Click column title to sort.</p>
@@ -77,39 +65,10 @@
 				</table>
 			</div>
 
-			<div id="users_search" class="content_divs">
-				<form name="form9" id="form9">
-					<h5>You can search on any of the fields listed below. The more
-					information you fill in, the narrower the search becomes.
-					<input type="hidden" name="bid" value=""></h5>
-					<fieldset>
-						<legend>WDD MyTime Assignment Search</legend>
-						<label for="lname">Last Name:</label>
-						<div class="fields2"><input type="text" name="lname" id="lname" size="22"></div><br class="clear">
-						<label for="fname">First Name:</label>
-						<div class="fields2"><input type="text" name="fname" id="fname" size="22"></div><br class="clear">
-						<label>&nbsp;</label>
-						<div class="fields2"><input type="submit" name="find" value="Start Search">
-						<input type="reset"></div><br class="clear">
-						<table id="user_assign_tbl" class="display" border="1" cellspacing="0" cellpadding="2" width="100%">
-							<thead>
-							<tr>
-							<th>UID</th>
-							<th>Name</th>
-							<th>Email</th>
-							<th>Roles</th>
-							<th>Act</th>
-							<th>&nbsp;</th>
-							</tr>
-							</thead>
-						</table>
-					</fieldset>
-				</form>
-			</div>
-
 			<div id="contact_show_edit" class="content_divs">
 				<div id="contactshow_div" class="contactform">
 					<input type="hidden" name="id" id="cid" value="">
+					<input type="hidden" name="cname" id="cname_id" value="">
 					<fieldset>
 						<legend>WDD MyTime Contact Record</legend>
 						<label>Name:</label>
@@ -145,7 +104,7 @@
 							<div class="fields2"><span id="addr_fax_v"></span></div><br class="clear">
 						</fieldset>
 						<label>Active:</label>
-						<div class="fields2"><span id="active_v"></span></div><br class="clear">
+						<div class="fields2"><span id="contact_active_v"></span></div><br class="clear">
 						<label>Entry Date/Time:</label>
 						<div class="fields2"><span id="cedtm_v"></span></div><br class="clear">
 						<label>Update Date/Time:</label>
@@ -210,6 +169,94 @@
 					<div id="mt_contactedit_errors"></div>
 				</div>
 			</div> <!-- end of contact_show_edit -->
+
+			<div id="clients_list" class="content_divs">
+				<p><input type="button" id="mt_add_client_btn" value="Add Client">
+				Click on Show to see details. Click column title to sort.</p>
+				<table id="mt_clients_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
+					<thead>
+					<tr>
+					<th>Client Code</th><th>Client Name</th><th>Contact Name</th><th>Active</th><th>&nbsp;</th>
+					</tr>
+					</thead>
+				</table>
+			</div>
+
+			<div id="client_show_edit" class="content_divs">
+				<div id="clientshow_div" class="clientform">
+					<input type="hidden" name="id" id="clientid" value="">
+					<fieldset>
+						<legend>WDD MyTime Client Record</legend>
+						<label>Client Code:</label>
+						<div class="fields2"><span id="client_cd_v"></span></div><br class="clear">
+						<label>Client Name:</label>
+						<div class="fields2"><span id="client_name_v"></span></div><br class="clear">
+						<label>Client Contact:</label>
+						<div class="fields2"><span id="client_contact_v"></span></div><br class="clear">
+						<label>Contacts:</label>
+						<div class="fields2"><span id="contacts_v"></span></div><br class="clear">
+						<fieldset>
+							<legend>Rates</legend>
+							<label>Hourly:</label>
+							<div class="fields2"><span id="hourly_rate_v"></span></div><br class="clear">
+							<label>Mileage:</label>
+							<div class="fields2"><span id="mileage_rate_v"></span></div><br class="clear">
+							<label>Distance:</label>
+							<div class="fields2"><span id="distance_v"></span></div><br class="clear">
+						</fieldset>
+						<label>Active:</label>
+						<div class="fields2"><span id="client_active_v"></span></div><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="cedtm_v"></span></div><br class="clear">
+						<label>Update Date/Time:</label>
+						<div class="fields2"><span id="cudtm_v"></span></div><br class="clear">
+					</fieldset>
+					<br>
+					<div align="center" id="client_show_buttons">
+						<span onclick="return wdb.edit_client(event);">Edit Contact</span>
+						<span onclick="return wdb.delete_client(event);">Delete Contact</span>
+					</div>
+				</div>
+
+				<div id="clientedit_div" class="clientform">
+					<form name="client_form1" id="clientedit_form1"><br>
+					<input type="hidden" name="id" id="client_id" value="">
+					<fieldset>
+						<legend>WDD MyTime Client Record</legend>
+						<label><span class="required">*</span>Client Code:</label>
+						<div class="fields2"><input type="text" name="client_cd" size="6" value=""></div><br class="clear">
+						<label for="client_name"><span class="required">*</span>Client Name:</label>
+						<div class="fields2"><input type="text" name="client_name" size="35" value=""></div><br class="clear">
+						<label><span class="required">*</span>Client Contact:</label>
+						<div class="fields2"><div id="client_contact_div"></div></div><br class="clear">
+						<label>Other Contacts:</label>
+						<div class="fields2"><div id="client_contacts_div"></div>
+						<input type="button" value="Select Contacts" onclick="return wdb.select_contacts();"></div><br class="clear">
+						<fieldset>
+							<legend>Rates</legend>
+							<label for="hourly_rate">Hourly:</label>
+							<div class="fields2"><input type="text" name="hourly_rate" size="6" value=""> Dollars</div><br class="clear">
+							<label for="mileage_rate">Mileage:</label>
+							<div class="fields2"><input type="text" name="mileage_rate" size="6" value=""> Dollars</div><br class="clear">
+							<label for="addr_city">Distance:</label>
+							<div class="fields2"><input type="text" name="distance" size="6" value=""> Miles</div><br class="clear">
+						</fieldset>
+						<label>Active:</label><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label><br class="clear">
+						<label>Entry Date/Time:</label>
+						<div class="fields2"><span id="cedtm"></span></div><br class="clear">
+						<label>Update Date/Time:</label>
+						<div class="fields2"><span id="cudtm"></span></div><br class="clear">
+					</fieldset>
+					<label>&nbsp;</label>
+					<div class="fields2"><input type="submit" value="SAVE">
+						<input type="button" id="client_edit_cancel" value="Cancel">
+					</div><br class="clear">
+					</form>
+					<br>
+					<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
+					<div id="mt_clientedit_errors"></div>
+				</div>
+			</div> <!-- end of client_show_edit -->
 
 			<div id="project_show_edit" class="content_divs">
 				<div id="projshow_div" class="projform content_divs">
@@ -350,6 +397,36 @@
 				</fieldset>
 				</form>
 				<div id="email_errors"></div>
+			</div>
+
+			<div id="users_search" class="content_divs">
+				<form name="form9" id="form9">
+					<h5>You can search on any of the fields listed below. The more
+					information you fill in, the narrower the search becomes.
+					<input type="hidden" name="bid" value=""></h5>
+					<fieldset>
+						<legend>WDD MyTime Assignment Search</legend>
+						<label for="lname">Last Name:</label>
+						<div class="fields2"><input type="text" name="lname" id="lname" size="22"></div><br class="clear">
+						<label for="fname">First Name:</label>
+						<div class="fields2"><input type="text" name="fname" id="fname" size="22"></div><br class="clear">
+						<label>&nbsp;</label>
+						<div class="fields2"><input type="submit" name="find" value="Start Search">
+						<input type="reset"></div><br class="clear">
+						<table id="user_assign_tbl" class="display" border="1" cellspacing="0" cellpadding="2" width="100%">
+							<thead>
+							<tr>
+							<th>UID</th>
+							<th>Name</th>
+							<th>Email</th>
+							<th>Roles</th>
+							<th>Act</th>
+							<th>&nbsp;</th>
+							</tr>
+							</thead>
+						</table>
+					</fieldset>
+				</form>
 			</div>
 
 			<div id="mt_admin" class="content_divs">

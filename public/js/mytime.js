@@ -438,9 +438,7 @@ var wdb = // setup the wdb namespace
 			$('#addr_work_v').html(data.phone.work);
 			$('#addr_cell_v').html(data.phone.cell);
 			$('#addr_fax_v').html(data.phone.fax);
-			$('input[name="active"]').removeAttr('checked');
-			if (data.active == 'y') $('input[name="active"][value="y"]').prop('checked',true);
-			else $('input[name="active"][value="n"]').prop('checked',true);
+			$('#contact_active_v').html(data.active == 'y' ? 'Yes' : 'No' );
 			$('#cedtm_v').html(data.edtm);
 			$('#cudtm_v').html(data.udtm);
 			$('#contactshow_div').show();
@@ -491,6 +489,37 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	mt_contactedit_handler: function( event ) {
+		//alert('mt_contactedit_handler '+$('#mt_form2').serialize()); return false;
+		//var err = wdb.validate();
+		var err = wdb.validate_contact();
+		if (err != '')
+		{
+			$('#mt_contactedit_errors').html('Errors encountered:<br>'+err);
+			return false;
+		}
+		var id = $('#contact_id').val();
+		var params = 'action=contact_add_update&'+$('#contactedit_form1').serialize();
+		//alert('workloghandler '+params);
+		$.ajax({
+			url: 'mt_add_update_contact',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#contact_show_edit').dialog('close');
+				wdb.mtcontacts(event);
+				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
+			}
+			else
+				$('#mt_contactedit_errors').html(response);
+		});
+		return false;
+	},
+
 	delete_contact: function ( event )
 	{
 		if (!confirm("Really delete this entry?")) return false;
@@ -518,6 +547,171 @@ var wdb = // setup the wdb namespace
 	{
 		$('#contactshow_div').show();
 		$('#contactedit_div').hide();
+		return false;
+	},
+
+	mtclients: function ( event )
+	{
+		var params = {
+			'action': 'clients_list'
+		};
+		$('#mt_clients_tbl tbody').off( 'click', 'button');
+		var table = $('#mt_clients_tbl').DataTable({
+			'ajax': {
+				'url': 'mt_clients_list',
+				'type': 'get',
+				'data': params
+			},
+			'destroy': true,
+			'order': [[ 0, "asc" ]],
+			'columns': [
+				{'data': 'client_cd'},
+				{'data': 'client_name'},
+				{'data': 'cname'},
+				{'data': 'active'},
+				null
+			],
+			'columnDefs': [ {
+				'targets': -1,
+				'data': null,
+				'defaultContent': '<button>Show</button>'
+			} ]
+		});
+		$('#mt_clients_tbl tbody').on( 'click', 'button', function () {
+			var data = table.row( $(this).parents('tr') ).data();
+			//alert( 'id='+data[4]);
+			wdb.clientshowdialog(event,data._id);
+		} );
+		$('#projects_list').hide();
+		$('#clients_list').show();
+		$('#contacts_list').hide();
+		return false;
+	},
+
+	mtclientadd: function ( event )
+	{
+		wdb.showDialogDiv('WDD MyTime Client Add','client_show_edit');
+		$('#mt_clientedit_errors').html('');
+		$('#client_id').val('');
+		$('#clientedit_form1 input[type="text"]').val('');
+		$('#clientedit_form1 input[name="client_cd"]').removeAttr('readonly');
+		//$('#euser').html(wdb.login_content.uid);
+		$('#clientedit_form1 input[name="client_name"]').val('');
+		$('#clientedit_form1 select[name="client"]').val('');
+		$('#clientedit_form1 input[name="hourly_rate"]').val('0.0');
+		$('#clientedit_form1 input[name="mileage_rate"]').val('0.0');
+		$('#clientedit_form1 input[name="distance"]').val('0');
+		$('#clientedit_form1 input[name="active"]').removeAttr('checked');
+		$('#clientedit_form1 input[name="active"][value="y"]').prop('checked',true);
+		$('#cedtm').html('');
+		$('#uedtm').html('');
+		wdb.hideview_content($('#client_show_edit'));
+		$('#clientshow_div').hide();
+		$('#clientedit_div').show();
+		return false;
+	},
+
+	clientshow: function ( event, id )
+	{
+		//alert(id);
+		//var id2 = parseInt(id.replace(/[^\d]/g,''));
+		var params = "action=show&id="+id;
+		$.ajax({
+			url: 'mt_get_client',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//console.log(data);
+			wdb.proj_doc = data;
+			$('#mt_client_show').dialog('option','title','WDD MyTime Client '+data.client_cd);
+			$('#clientid').val(id);
+			$('#client_cd_v').html(data.client_cd);
+			$('#client_name_v').html(data.client_name);
+			$('#client_contact_v').html(data.client);
+			$('#hourly_rate_v').html(data.hourly_rate);
+			$('#mileage_rate_v').html(data.mileage_rate);
+			$('#distance_v').html(data.distance);
+			$('#client_active_v').html(data.active == 'y' ? 'Yes' : 'No' );
+			$('#cedtm_v').html(data.edtm);
+			$('#cudtm_v').html(data.udtm);
+			$('#clientshow_div').show();
+			$('#clientedit_div').hide();
+		});
+		return false;
+	},
+
+	edit_client: function ( event, id )
+	{
+		var id2 = $('#cid').val();
+		if (id) id2 = id;
+		//alert('edit_proj '+id2);
+		var params = "action=edit&id="+id2;
+		$.ajax({
+			url: 'mt_get_client',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//$('#content_div').html(response);
+			//$('#mtshow_div').dialog('close');
+			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
+			$('#mt_clientedit_errors').html('');
+			$('#client_id').val(data._id);
+			$('#clientedit_form1 input[name="client_cd"]').html(data.client_cd);
+			$('#clientedit_form1 input[name="client_name"]').val(data.client_name);
+			$('#clientedit_form1 select[name="client"]').val(data.client);
+			$('#clientedit_form1 input[name="hourly_rate"]').val(data.hourly_rate);
+			$('#clientedit_form1 input[name="mileage_rate"]').val(data.mileage_rate);
+			$('#clientedit_form1 input[name="distance"]').val(data.distance);
+			$('input[name="active"]').removeAttr('checked');
+			if (data.active == 'y') $('input[name="active"][value="y"]').prop('checked',true);
+			else $('input[name="active"][value="n"]').prop('checked',true);
+			$('#cedtm').html(data.edtm);
+			$('#cudtm').html(data.udtm);
+			$('#clientshow_div').hide();
+			$('#clientedit_div').show();
+		});
+		return false;
+	},
+
+	mt_clientedit_handler: function( event ) {
+		//alert('mt_clientedit_handler '+$('#mt_form2').serialize()); return false;
+		//var err = wdb.validate();
+		var err = wdb.validate_client();
+		if (err != '')
+		{
+			$('#mt_clientedit_errors').html('Errors encountered:<br>'+err);
+			return false;
+		}
+		var id = $('#client_id').val();
+		var params = 'action=client_add_update&'+$('#clientedit_form1').serialize();
+		//alert('workloghandler '+params);
+		$.ajax({
+			url: 'mt_add_update_client',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#client_show_edit').dialog('close');
+				wdb.mtclients(event);
+				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
+			}
+			else
+				$('#mt_clientedit_errors').html(response);
+		});
+		return false;
+	},
+
+	mt_clientedit_cancel: function( event )
+	{
+		//alert('mt_proj_cancel');
+		$('#client_show_edit').dialog('close');
 		return false;
 	},
 
@@ -829,6 +1023,24 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	validate_client: function ( )
+	{
+		var err = '';
+		var f = document.client_form1;
+		//alert(f.serialize()); return err;
+		if (f.client_cd.value.blank())
+			err += ' - Client Code must not be blank<br>';
+		if (f.client_name.value.blank())
+			err += ' - Client Name must not be blank<br>';
+		if (f.client.value.blank())
+			err += ' - Client Contact must be selected<br>';
+		// if (f.comments.value.blank())
+		// 	err += ' - Comments must not be blank<br>';
+	// 	if (!datere.test($('#bdate').val()))
+	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
+		return err;
+	},
+
 	validate_contact: function ( )
 	{
 		var err = '';
@@ -970,8 +1182,8 @@ var wdb = // setup the wdb namespace
 		$('input[name="cd"]').removeAttr('readonly');
 		$('input[name="active"]').removeAttr('checked');
 		$('input[name="active"][value="y"]').prop('checked',true);
-    $('input[name="lu_type"]').val($('#mt_admin_types select').val());
-    $('input[name="lu_action"]').val('add');
+	    $('input[name="lu_type"]').val($('#mt_admin_types select').val());
+	    $('input[name="lu_action"]').val('add');
 		wdb.hideview_content($('#mt_lu_form'),$('#mt_admin'));
 	},
 
@@ -1284,6 +1496,32 @@ var wdb = // setup the wdb namespace
 		return obj;
 	},
 
+	build_contact_selection: function ( name )
+	{
+		//debugger;
+		var obj = $('<select></select>').attr('name',name);
+		var opt = $('<option></option>').attr('value','').html('--Select One--');
+		obj.append(opt);
+		var params = 'action=mt_contacts_data';
+		$.ajax({
+			url: 'mt_contacts_list',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			for (var i=0; i<data.data.length; ++i)
+			{
+				var rec = data.data[i];
+				//console.log(rec);
+				var opt = $('<option></option>').attr('value',rec._id).html(rec.cname);
+				obj.append(opt);
+			}
+		});
+		//console.log(obj);
+		return obj;
+	},
+
 	reload_lookups: function ( )
 	{
 		var params = 'action=mt_init';
@@ -1331,6 +1569,8 @@ var wdb = // setup the wdb namespace
 		$('#mt_add_project_btn').on('click',wdb.mtprojadd);
 		$('#mt_clients_btn').button();
 		$('#mt_clients_btn').on('click',wdb.mtclients);
+		$('#mt_add_client_btn').button();
+		$('#mt_add_client_btn').on('click',wdb.mtclientadd);
 		$('#mt_contacts_btn').button();
 		$('#mt_contacts_btn').on('click',wdb.mtcontacts);
 		$('#mt_add_contact_btn').button();
@@ -1344,7 +1584,9 @@ var wdb = // setup the wdb namespace
 		$('#contactshow_form').on('submit',wdb.mt_contactshow_handler);
 		$('#contactedit_form1').on('submit',wdb.mt_contactedit_handler);
 		$('#contact_edit_cancel').on('click',wdb.mt_contactedit_cancel);
-		$('#mt_form2').on('submit',wdb.workloghandler);
+		$('#clientshow_form').on('submit',wdb.mt_clientshow_handler);
+		$('#clientedit_form1').on('submit',wdb.mt_clientedit_handler);
+		$('#client_edit_cancel').on('click',wdb.mt_clientedit_cancel);
 		$('#mt_form9').on('submit',wdb.handle_search);
 		$('#mt_email_form').on('submit',wdb.email_mt);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
@@ -1377,6 +1619,9 @@ var wdb = // setup the wdb namespace
 			var sel = wdb.build_selection('status2',data.mt_status);
 			$('#btc_status').empty().append(sel);
 			if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();
+			var sel = wdb.build_contact_selection('client');
+			console.log(sel);
+			$('#client_contact_div').empty().append(sel);
 		});
 	}
 
