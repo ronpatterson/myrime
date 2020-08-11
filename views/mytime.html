@@ -198,23 +198,23 @@
 						<fieldset>
 							<legend>Rates</legend>
 							<label>Hourly:</label>
-							<div class="fields2"><span id="hourly_rate_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_hourly_rate_v"></span></div><br class="clear">
 							<label>Mileage:</label>
-							<div class="fields2"><span id="mileage_rate_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_mileage_rate_v"></span></div><br class="clear">
 							<label>Distance:</label>
-							<div class="fields2"><span id="distance_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_distance_v"></span></div><br class="clear">
 						</fieldset>
 						<label>Active:</label>
 						<div class="fields2"><span id="client_active_v"></span></div><br class="clear">
 						<label>Entry Date/Time:</label>
-						<div class="fields2"><span id="cedtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="client_edtm_v"></span></div><br class="clear">
 						<label>Update Date/Time:</label>
-						<div class="fields2"><span id="cudtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="client_udtm_v"></span></div><br class="clear">
 					</fieldset>
 					<br>
 					<div align="center" id="client_show_buttons">
-						<span onclick="return wdb.edit_client(event);">Edit Contact</span>
-						<span onclick="return wdb.delete_client(event);">Delete Contact</span>
+						<span onclick="return wdb.edit_client(event);">Edit Client</span>
+						<span onclick="return wdb.delete_client(event);">Delete Client</span>
 					</div>
 				</div>
 
@@ -224,14 +224,15 @@
 					<fieldset>
 						<legend>WDD MyTime Client Record</legend>
 						<label><span class="required">*</span>Client Code:</label>
-						<div class="fields2"><input type="text" name="client_cd" size="6" value=""></div><br class="clear">
+						<div class="fields2"><span name="client_cd"></span></div><br class="clear">
 						<label for="client_name"><span class="required">*</span>Client Name:</label>
 						<div class="fields2"><input type="text" name="client_name" size="35" value=""></div><br class="clear">
 						<label><span class="required">*</span>Client Contact:</label>
 						<div class="fields2"><div id="client_contact_div"></div></div><br class="clear">
 						<label>Other Contacts:</label>
 						<div class="fields2"><div id="client_contacts_div"></div>
-						<input type="button" value="Select Contacts" onclick="return wdb.select_contacts();"></div><br class="clear">
+						<input type="hidden" id="client_contacts_hidden" value="">
+						<input type="button" value="Select Contacts" onclick="return wdb.select_contacts(event);"></div><br class="clear">
 						<fieldset>
 							<legend>Rates</legend>
 							<label for="hourly_rate">Hourly:</label>
@@ -243,9 +244,9 @@
 						</fieldset>
 						<label>Active:</label><label class="yesno"><input type="radio" name="active" value="y">Yes</label> <label class="yesno"><input type="radio" name="active" value="n">No</label><br class="clear">
 						<label>Entry Date/Time:</label>
-						<div class="fields2"><span id="cedtm"></span></div><br class="clear">
+						<div class="fields2"><span id="client_edtm"></span></div><br class="clear">
 						<label>Update Date/Time:</label>
-						<div class="fields2"><span id="cudtm"></span></div><br class="clear">
+						<div class="fields2"><span id="client_udtm"></span></div><br class="clear">
 					</fieldset>
 					<label>&nbsp;</label>
 					<div class="fields2"><input type="submit" value="SAVE">
@@ -483,6 +484,16 @@
 						</tr>
 						</thead>
 					</table>
+				</div>
+
+				<!-- utility divs -->
+
+				<div id="contacts_selections" class="content_divs">
+					<p><input type="button" id="mt_contacts_done_btn" value="Done"><input type="button" id="mt_add_contact_btn2" value="Add Contact">
+					Click on checkboxes to add contacts to client.</p>
+					<div style="width: 750px;">
+						<div id="contacts_checkboxes"></div>
+					</div>
 				</div>
 
 				<div id="mt_users_form" class="mtform mtadmin content_divs">

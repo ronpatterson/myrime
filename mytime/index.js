@@ -414,6 +414,38 @@ module.exports = function() {
 			});
 		},
 
+		get_client: (db, req, res) => {
+            var id = req.query.id;
+            db.collection('clients')
+            .findOne(
+                { '_id': new ObjectId(id) },
+                (err, client) => {
+                    assert.equal(null, err);
+                    client.edtm = dateFormat(client.entry_dtm,dateFmt1);
+                    client.udtm = typeof(client.update_dtm) == 'undefined' ? '' : dateFormat(client.update_dtm,dateFmt1);
+					// debugger;
+					if (client.client != '') {
+						db.collection('contacts')
+			            .findOne(
+			                { '_id': new ObjectId(client.client) },
+			                (err, contact) => {
+			                    assert.equal(null, err);
+								client.contact_name = contact.cname;
+								console.log(client);
+			                    res.json(client);
+			                    res.end();
+							}
+						);
+					}
+					else {
+						console.log(client);
+						res.json(client);
+						res.end();
+					}
+                }
+            );
+        },
+
 		client_add_update: (db, req, res, next) => {
             // client_cd, client_name, client, contacts, hourly_rate, mileage_rate, distance, active
             //console.log('add/edit',req.body); res.end('TEST'); return;
