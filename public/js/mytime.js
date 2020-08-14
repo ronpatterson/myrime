@@ -26,7 +26,9 @@ var wdb = // setup the wdb namespace
 	stimer: 0,
 	group_def: 'WDD', // default group
 	group_data: {},
-	mt_doc: {},
+	contact_doc: {},
+	client_doc: {},
+	proj_doc: {},
 
 	check_session: function (event)
 	{
@@ -422,8 +424,8 @@ var wdb = // setup the wdb namespace
 		}).done(function (data)
 		{
 			//console.log(data);
-			wdb.proj_doc = data;
-			$('#mt_contact_show').dialog('option','title','WDD MyTime Contact '+data.mt_id);
+			wdb.contact_doc = data;
+			// $('#mt_contact_show').dialog('option','title','WDD MyTime Contact '+data.mt_id);
 			$('#cname_v').html(data.cname);
 			$('#lname_v').html(data.lname);
 			$('#fname_v').html(data.fname);
@@ -462,6 +464,7 @@ var wdb = // setup the wdb namespace
 		{
 			//$('#content_div').html(response);
 			//$('#mtshow_div').dialog('close');
+			wdb.contact_doc = data;
 			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
 			$('#mt_contactedit_errors').html('');
 			$('#contact_id').val(data._id);
@@ -522,11 +525,11 @@ var wdb = // setup the wdb namespace
 
 	delete_contact: function ( event )
 	{
-		if (!confirm("Really delete this entry?")) return false;
+		if (!confirm("Really delete this contact?")) return false;
 		var params = 'action=delete';
 		params += '&id='+$('#cid').val();
 		$.ajax({
-			url: 'contact_delete',
+			url: 'mt_delete_contact',
 			type: 'post',
 			data: params,
 			dataType: 'html'
@@ -535,7 +538,7 @@ var wdb = // setup the wdb namespace
 			if (/^SUCCESS/.test(response))
 			{
 				$('#contact_show_edit').dialog('close');
-				wdb.mt_contacts_list(event);
+				wdb.mtcontacts(event);
 			}
 			else
 				alert(response);
@@ -599,6 +602,7 @@ var wdb = // setup the wdb namespace
 		//$('#euser').html(wdb.login_content.uid);
 		$('#clientedit_form1 input[name="client_name"]').val('');
 		$('#clientedit_form1 select[name="client"]').val('');
+		$('#clientedit_form1 select[name="client_type"]').val('');
 		$('#clientedit_form1 input[name="hourly_rate"]').val('0.0');
 		$('#clientedit_form1 input[name="mileage_rate"]').val('0.0');
 		$('#clientedit_form1 input[name="distance"]').val('0');
@@ -632,12 +636,13 @@ var wdb = // setup the wdb namespace
 		}).done(function (data)
 		{
 			//console.log(data);
-			wdb.proj_doc = data;
-			$('#mt_client_show').dialog('option','title','WDD MyTime Client '+data.client_cd);
+			wdb.client_doc = data;
+			// $('#mt_client_show').dialog('option','title','WDD MyTime Client '+data.client_cd);
 			$('#clientid').val(id);
 			$('#client_cd_v').html(data.client_cd);
 			$('#client_name_v').html(data.client_name);
 			$('#client_contact_v').html(data.contact_name);
+			$('#client_type_v').html(wdb.get_lookup(wdb.group_data.mt_type,data.type));
 			$('#client_hourly_rate_v').html(data.hourly_rate);
 			$('#client_mileage_rate_v').html(data.mileage_rate);
 			$('#client_distance_v').html(data.distance);
@@ -666,12 +671,15 @@ var wdb = // setup the wdb namespace
 		{
 			//$('#content_div').html(response);
 			//$('#mtshow_div').dialog('close');
+			wdb.client_doc = data;
 			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
 			$('#mt_clientedit_errors').html('');
 			$('#client_id').val(data._id);
-			$('#clientedit_form1 span[name="client_cd"]').html(data.client_cd);
+			$('#clientedit_form1 input[name="client_cd"]').val(data.client_cd);
+			$('#clientedit_form1 input[name="client_cd"]').attr('readonly',true);
 			$('#clientedit_form1 input[name="client_name"]').val(data.client_name);
 			$('#clientedit_form1 select[name="client"]').val(data.client);
+			$('#clientedit_form1 select[name="client_type"]').val(data.type);
 			$('#clientedit_form1 input[name="hourly_rate"]').val(data.hourly_rate);
 			$('#clientedit_form1 input[name="mileage_rate"]').val(data.mileage_rate);
 			$('#clientedit_form1 input[name="distance"]').val(data.distance);
@@ -714,6 +722,29 @@ var wdb = // setup the wdb namespace
 			}
 			else
 				$('#mt_clientedit_errors').html(response);
+		});
+		return false;
+	},
+
+	delete_client: function ( event )
+	{
+		if (!confirm("Really delete this client?")) return false;
+		var params = 'action=delete';
+		params += '&id='+$('#clientid').val();
+		$.ajax({
+			url: 'mt_delete_client',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#client_show_edit').dialog('close');
+				wdb.mtclients(event);
+			}
+			else
+				alert(response);
 		});
 		return false;
 	},
@@ -1036,6 +1067,8 @@ var wdb = // setup the wdb namespace
 	validate_client: function ( )
 	{
 		var err = '';
+		var hoursre = /^[0-9]+([.][0-9]+)?$/;
+		var numre = /^[0-9]+$/;
 		var f = document.client_form1;
 		//alert(f.serialize()); return err;
 		if (f.client_cd.value.blank())
@@ -1044,6 +1077,16 @@ var wdb = // setup the wdb namespace
 			err += ' - Client Name must not be blank<br>';
 		if (f.client.value.blank())
 			err += ' - Client Contact must be selected<br>';
+		if (f.client_type.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (f.hourly_rate.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (!hoursre.test(f.hourly_rate.value))
+			err += ' - Hourly Rate is not valid (decimal number)<br>';
+		if (!hoursre.test(f.mileage_rate.value))
+			err += ' - Mileage Rate is not valid (decimal number)<br>';
+		if (!numre.test(f.distance.value))
+			err += ' - Distance is not valid (integer)<br>';
 		// if (f.comments.value.blank())
 		// 	err += ' - Comments must not be blank<br>';
 	// 	if (!datere.test($('#bdate').val()))
@@ -1686,6 +1729,8 @@ var wdb = // setup the wdb namespace
 			$('#priority_s').empty().append(sel);
 			var sel = wdb.build_selection('mt_type2',data.mt_type);
 			$('#btc_types').empty().append(sel);
+			var sel = wdb.build_selection('client_type',data.mt_type);
+			$('#client_types').empty().append(sel);
 			var sel = wdb.build_selection('status2',data.mt_status);
 			$('#btc_status').empty().append(sel);
 			if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();

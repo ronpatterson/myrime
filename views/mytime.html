@@ -195,14 +195,16 @@
 						<div class="fields2"><span id="client_contact_v"></span></div><br class="clear">
 						<label>Contacts:</label>
 						<div class="fields2"><span id="contacts_v"></span></div><br class="clear">
+						<label>Type:</label>
+						<div class="fields2"><span id="client_type_v"></span></div><br class="clear">
 						<fieldset>
 							<legend>Rates</legend>
 							<label>Hourly:</label>
-							<div class="fields2"><span id="client_hourly_rate_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_hourly_rate_v"></span> Dollars</div><br class="clear">
 							<label>Mileage:</label>
-							<div class="fields2"><span id="client_mileage_rate_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_mileage_rate_v"></span> Dollars</div><br class="clear">
 							<label>Distance:</label>
-							<div class="fields2"><span id="client_distance_v"></span></div><br class="clear">
+							<div class="fields2"><span id="client_distance_v"></span> Miles</div><br class="clear">
 						</fieldset>
 						<label>Active:</label>
 						<div class="fields2"><span id="client_active_v"></span></div><br class="clear">
@@ -224,7 +226,7 @@
 					<fieldset>
 						<legend>WDD MyTime Client Record</legend>
 						<label><span class="required">*</span>Client Code:</label>
-						<div class="fields2"><span name="client_cd"></span></div><br class="clear">
+						<div class="fields2"><input type="text" name="client_cd" size="6" value=""></div><br class="clear">
 						<label for="client_name"><span class="required">*</span>Client Name:</label>
 						<div class="fields2"><input type="text" name="client_name" size="35" value=""></div><br class="clear">
 						<label><span class="required">*</span>Client Contact:</label>
@@ -233,6 +235,8 @@
 						<div class="fields2"><div id="client_contacts_div"></div>
 						<input type="hidden" id="client_contacts_hidden" value="">
 						<input type="button" value="Select Contacts" onclick="return wdb.select_contacts(event);"></div><br class="clear">
+						<label for="client_type"><span class="required">*</span>Type:</label>
+						<div class="fields2"><span id="client_types"></span></div><br class="clear">
 						<fieldset>
 							<legend>Rates</legend>
 							<label for="hourly_rate">Hourly:</label>

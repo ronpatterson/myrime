@@ -191,7 +191,7 @@ module.exports = function() {
         },
 
 		delete_contact: (db, req, res) => {
-			console.log(req.body); res.end('SUCCESS'); return;
+			console.log('delete_contact:',req.body); res.end('SUCCESS'); return false;
 			var id = req.body.id;
 			var cname = req.body.cname;
 			// check for link to clients
@@ -215,6 +215,41 @@ module.exports = function() {
 						(err, result) => {
 							  assert.equal(err, null);
 							  console.log("Removed document from the contacts collection.");
+							  //console.log(result);
+							  res.send('SUCCESS');
+							  res.end();
+							}
+						);
+					}
+				}
+			);
+		},
+
+		delete_client: (db, req, res) => {
+			console.log('delete_client:',req.body); res.end('SUCCESS'); return false;
+			var id = req.body.id;
+			var cname = req.body.client_name;
+			// check for link to clients
+			db.collection('projects')
+			.findOne(
+				{ 'client': id },
+				(err, project) => {
+					if (project)
+					{
+						assert.equal(null, err);
+						console.log(cname + " linked in the projects collection.");
+						//console.log(result);
+						res.send('FAIL ' + cname + ' found in projects!');
+						res.end();
+						return false;
+					}
+					else { // good to go
+						db.collection('clients')
+						.removeOne(
+						{ '_id': new ObjectId(id) },
+						(err, result) => {
+							  assert.equal(err, null);
+							  console.log("Removed document from the clients collection.");
 							  //console.log(result);
 							  res.send('SUCCESS');
 							  res.end();
@@ -251,6 +286,7 @@ module.exports = function() {
 				//console.log(doc);
 				//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
 				doc.name = doc.lname + ', ' + doc.fname;
+				doc.active = doc.active == 'y' ? 'Yes' : 'No';
 				//doc.status = getWDDlookup("status",doc.status);
 				results.push(doc);
 			}, (err) => {
@@ -405,10 +441,11 @@ module.exports = function() {
 					//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
 					//doc.status = getWDDlookup("status",doc.status);
 					doc.cname = doc.contact_info[0].cname;
+					doc.active = doc.active == 'y' ? 'Yes' : 'No';
 					results.push(doc);
 				});
 				results = {'data':results};
-				console.log('results:',results);
+				//console.log('results:',results);
 				res.json(results);
 				res.end();
 			});
@@ -470,8 +507,9 @@ module.exports = function() {
 							var doc = {
   "client_cd": client_cd
 , "client_name": req.body.client_name
-, "client": req.body.client
+, "client": new ObjectId(req.body.client)
 , "contacts": req.body.contacts_ids
+, "type": req.body.client_type
 , "hourly_rate": req.body.hourly_rate
 , "mileage_rate": req.body.mileage_rate
 , "distance": req.body.distance
@@ -497,21 +535,22 @@ module.exports = function() {
 				var id = req.body.id;
 				var doc = {
   "client_name": req.body.client_name
-, "client": req.body.client_id
+, "client": new ObjectId(req.body.client)
 , "contacts": req.body.contacts_ids
+, "type": req.body.client_type
 , "hourly_rate": req.body.hourly_rate
 , "mileage_rate": req.body.mileage_rate
 , "distance": req.body.distance
 , "active": req.body.active
-, "entry_dtm": new Date()
+, "update_dtm": new Date()
 };
-                var rec = db.collection('contacts')
+                var rec = db.collection('clients')
                 .updateOne(
                     { '_id': new ObjectId(id) },
                     { '$set': doc },
                     (err, result) => {
                         assert.equal(err, null);
-						console.log("Updated a document into the contacts collection.");
+						console.log("Updated a document into the clients collection.");
                         //console.log(result);
                         res.send('SUCCESS');
                         res.end();

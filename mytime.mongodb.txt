@@ -56,6 +56,7 @@ db.clients {
     "client_name : string,
     "client" : ObjectId, // contacts
     "contacts" : [ ObjectId,... ], // contacts
+    "type" : char, // mt_type
     "hourly_rate" : decimal,
     "mileage_rate" : decimal,
     "distance" : decimal,
