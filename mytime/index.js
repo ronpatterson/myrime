@@ -111,6 +111,7 @@ module.exports = function() {
         add_update_proj: (db, req, res, next) => {
             //console.log(req.body); res.end('TEST'); return;
             if (typeof(req.body['id']) == 'undefined' || req.body.id == '') { // add
+				// assign a project code
                 db.collection('counters').findAndModify (
                     { "_id": 'proj_cd' },
                     [ ],
@@ -123,7 +124,7 @@ module.exports = function() {
                         assert.equal(null, err);
                         console.log(updoc);
                         var id = updoc.value.seq;
-                        var proj_cd = req.body.group + id;
+                        var proj_cd = req.body.client_cd + id;
                         var iid = new ObjectId();
                         var doc = {
   "_id": iid
@@ -317,20 +318,28 @@ module.exports = function() {
 		contact_add_update: (db, req, res, next) => {
             // cname, lname, fname, email, addr_number, addr_street, addr_city, addr_state, addr_zip, addr_country, active
             //console.log('add/edit',req.body); res.end('TEST'); return;
+			// setup the db document
 			var cname = req.body.lname + ', ' + req.body.fname;
-			var addr = {
+			var doc = {
+  "cname": cname
+, "lname": req.body.lname
+, "fname": req.body.fname
+, "email": req.body.email
+, "address": {
   "number": req.body.addr_number
 , "street": req.body.addr_street
 , "city": req.body.addr_city
 , "state": req.body.addr_state
 , "zip": req.body.addr_zip
 , "country": req.body.addr_country
-			};
-			var phone = {
+}
+, "phone": {
   "work": req.body.work
 , "cell": req.body.cell
 , "fax": req.body.fax
-			};
+}
+, "active": req.body.active
+};
 			// check action
             if (req.body.id == '') { // add
 				// check for duplicate
@@ -348,16 +357,7 @@ module.exports = function() {
 							return false;
 	                	}
 						else {
-							var doc = {
-  "cname": cname
-, "lname": req.body.lname
-, "fname": req.body.fname
-, "email": req.body.email
-, "address": addr
-, "phone": phone
-, "active": req.body.active
-, "entry_dtm": new Date()
-};
+							doc.entry_dtm = new Date();
 			                var rec = db.collection('contacts')
 			                .insertOne(
 			                    doc,
@@ -391,16 +391,7 @@ module.exports = function() {
 							return false;
 						}
 						else { // good to go
-							var doc = {
-  "cname": cname
-, "lname": req.body.lname
-, "fname": req.body.fname
-, "email": req.body.email
-, "address": addr
-, "phone": phone
-, "active": req.body.active
-, "update_dtm": new Date()
-};
+							doc.update_dtm = new Date();
 			                var rec = db.collection('contacts')
 			                .updateOne(
 			                    { '_id': new ObjectId(id) },
@@ -483,10 +474,47 @@ module.exports = function() {
             );
         },
 
+		get_client_contacts: (db, req, res, next) => {
+			var cids = req.query.contacts.split(',');
+			var ids = [];
+			cids.forEach((item, i) => {
+				ids.push(new ObjectId(item));
+			});
+			// TODO determine multiple _id query
+            db.collection('contacts')
+            .find(
+                { '_id': { '$in': ids } },
+                (err, contact) => {
+                    assert.equal(null, err);
+                    contact.edtm = dateFormat(contact.entry_dtm,dateFmt1);
+                    contact.udtm = typeof(contact.update_dtm) == 'undefined' ? '' : dateFormat(contact.update_dtm,dateFmt1);
+                    console.log(contact);
+                    res.json(contact);
+                    res.end();
+                }
+            );
+		},
+
 		client_add_update: (db, req, res, next) => {
             // client_cd, client_name, client, contacts, hourly_rate, mileage_rate, distance, active
             //console.log('add/edit',req.body); res.end('TEST'); return;
 			var client_cd = req.body.client_cd;
+			var contacts = [];
+			req.body.contacts_ids.split(',').forEach((item, i) => {
+				contacts.push(new ObjectId(item.trim()));
+			});
+			// setup db document
+			var doc = {
+  "client_cd": client_cd
+, "client_name": req.body.client_name
+, "client": new ObjectId(req.body.client)
+, "contacts": contacts
+, "type": req.body.client_type
+, "hourly_rate": req.body.hourly_rate
+, "mileage_rate": req.body.mileage_rate
+, "distance": req.body.distance
+, "active": req.body.active
+};
 			// check action
             if (req.body.id == '') { // add
 				// check for duplicate
@@ -504,18 +532,7 @@ module.exports = function() {
 							return false;
 	                	}
 						else {
-							var doc = {
-  "client_cd": client_cd
-, "client_name": req.body.client_name
-, "client": new ObjectId(req.body.client)
-, "contacts": req.body.contacts_ids
-, "type": req.body.client_type
-, "hourly_rate": req.body.hourly_rate
-, "mileage_rate": req.body.mileage_rate
-, "distance": req.body.distance
-, "active": req.body.active
-, "entry_dtm": new Date()
-};
+							doc.entry_dtm = new Date();
 			                var rec = db.collection('clients')
 			                .insertOne(
 			                    doc,
@@ -533,17 +550,8 @@ module.exports = function() {
             }
             else { // update
 				var id = req.body.id;
-				var doc = {
-  "client_name": req.body.client_name
-, "client": new ObjectId(req.body.client)
-, "contacts": req.body.contacts_ids
-, "type": req.body.client_type
-, "hourly_rate": req.body.hourly_rate
-, "mileage_rate": req.body.mileage_rate
-, "distance": req.body.distance
-, "active": req.body.active
-, "update_dtm": new Date()
-};
+				delete doc.client_cd;
+				doc.update_dtm = new Date();
                 var rec = db.collection('clients')
                 .updateOne(
                     { '_id': new ObjectId(id) },

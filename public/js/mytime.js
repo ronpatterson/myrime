@@ -1039,6 +1039,7 @@ var wdb = // setup the wdb namespace
 
 	email_mt: function (e) {
 		var err = '';
+		var emailre = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
 		if ($('input[name="sendto"]').val().blank())
 			err += ' - Send To must not be blank<br>';
 		if ($('input[name="subject"]').val().blank())
@@ -1067,14 +1068,17 @@ var wdb = // setup the wdb namespace
 	validate_client: function ( )
 	{
 		var err = '';
+		var codere = /^[A-Z][A-Za-z0-9]+$/;
 		var hoursre = /^[0-9]+([.][0-9]+)?$/;
 		var numre = /^[0-9]+$/;
 		var f = document.client_form1;
 		//alert(f.serialize()); return err;
 		if (f.client_cd.value.blank())
 			err += ' - Client Code must not be blank<br>';
-		if (f.client_name.value.blank())
-			err += ' - Client Name must not be blank<br>';
+		if (!codere.test(f.client_cd.value))
+			err += ' - Client Code is not valid<br>';
+		if (f.client_cd.value.blank())
+			err += ' - Client Code must not be blank<br>';
 		if (f.client.value.blank())
 			err += ' - Client Contact must be selected<br>';
 		if (f.client_type.value.blank())
@@ -1626,8 +1630,12 @@ var wdb = // setup the wdb namespace
 				arr2.push(id[1]);
 			}
 		});
-		$('#client_contacts_hidden').html(arr.toString());
-		$('#client_contacts_div').html(arr2.toString().replace(/\,([^ ])/g,'<br>$1'));
+		$('#client_contacts_hidden').val(arr.toString());
+		$('#client_contacts_div').html('');
+		arr2.forEach((name, i) => {
+			$('#client_contacts_div').append(name + '<br>');
+		});
+		$('#contacts_selections').dialog('close');
 		return true;
 	},
 

@@ -68,7 +68,7 @@ db.clients {
 db.projects {
     "_id" : ObjectId,
     "proj_cd" : string, // client_cd.seq
-    "client_cd" : string, // clients
+    "client_cd" : ObjectId, // clients
     "name" : string,
     "po_nbr" : string,
     "priority" : char, // mt_priority
@@ -101,7 +101,7 @@ db.projects {
 
 db.worklog {
     "_id" : ObjectId,
-    "proj_cd": string, // mt_projects
+    "project": ObjectId, // projects
     "name" : string,
     "catagory" : char, // mt_category
     "kind" :  : char, // mt_kind
