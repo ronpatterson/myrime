@@ -29,6 +29,7 @@ var wdb = // setup the wdb namespace
 	contact_doc: {},
 	client_doc: {},
 	proj_doc: {},
+	dateFmt1: 'mm/dd/yyyy h:MM tt',
 
 	check_session: function (event)
 	{
@@ -190,6 +191,7 @@ var wdb = // setup the wdb namespace
 		} );
 		$('#projects_list').show();
 		$('#contacts_list').hide();
+		$('#clients_list').hide();
 		return false;
 	},
 
@@ -197,37 +199,79 @@ var wdb = // setup the wdb namespace
 	{
 		wdb.showDialogDiv('WDD MyTime Project Add','projedit_div');
 		$('#projedit_errors').html('');
+		$('#pid').val('');
 		$('#projedit_form1 input[type="text"]').val('');
 		$('#projedit_form1 textarea').val('');
 		$('#euser').html(wdb.login_content.uid);
-		$('input[name="pid"]').val('');
-		$('select[name="mt_type"]').val('');
 		$('select[name="status"]').val('o');
-		$('#assignedDiv2').html('');
-		$('#mt_assign_btn2').hide();
 		$('select[name="priority"]').val('3');
-		$('#filesDiv,#bfiles,#assignedDiv').html('');
-		$('.mt_date').html('');
+		$('#projedit_form1 input[name="hourly_rate"]').val('0.0');
+		$('#projedit_form1 input[name="mileage_rate"]').val('0.0');
+		$('#projedit_form1 input[name="distance"]').val('0');
+		$('.projdate').val('');
 		$('#mtshow_div').hide();
 		$('#mtedit_div').show();
+		return false;
+	},
+
+	mt_proj_handler: function( event )
+	{
+		//alert('mt_proj_handler '+$('#projedit_form1').serialize()); return false;
+		debugger;
+		var err = wdb.validate_proj();
+		if (err != '')
+		{
+			$('#mt_projedit_errors').html('Errors encountered:<br>'+err);
+			return false;
+		}
+		$('#mt_projedit_errors').html('');
+		var params = 'action=add_update&'+$('#projedit_form1').serialize();
+		params += '&id='+$('#pid').val();
+		params += '&user_id='+$('#userid').val();
+		//alert('mthandler '+params);
+		$.ajax({
+			url: 'mt_add_update_proj',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+		    //console.log(response);
+			if (!/SUCCESS/.test(response))
+			{
+				$('#mt_projedit_errors').html(response);
+			}
+			else
+			{
+				wdb.mtprojects(event);
+				if ($('#pid').val() == '') {
+				    wdb.mt_save_cancel(event);
+				    var arr = response.split(/ ,/);
+				    wdb.projshow(event,arr[1]);
+				}
+				else wdb.projshow(event,$('#pid').val());
+				//$('#mt_mts_list_edit').dialog('close');
+				//window.setTimeout(function(e) {$('#mtedit_div').dialog('close');},3000);
+			}
+		});
 		return false;
 	},
 
 	mt_projedit_cancel: function( event )
 	{
 		//alert('mt_proj_cancel');
-		$('#projedit_div').dialog('close');
+		$('#project_show_edit').dialog('close');
 		return false;
 	},
 
-	edit_proj: function ( event, id )
+	edit_project: function ( event, id )
 	{
 		var id2 = $('#pid').val();
 		if (id) id2 = id;
 		//alert('edit_proj '+id2);
 		var params = "action=edit&id="+id2;
 		$.ajax({
-			url: 'proj_get',
+			url: 'mt_get_proj',
 			type: 'get',
 			data: params,
 			dataType: 'json'
@@ -236,37 +280,36 @@ var wdb = // setup the wdb namespace
 			//$('#content_div').html(response);
 			//$('#mtshow_div').dialog('close');
 			//wdb.showDialogDiv('MyTime Bug '+data.mt_id,'mt_mts_show_edit');
-			$('#mtedit_errors').html('');
-			$('#mtedit_id').html(data.mt_id);
+			$('#mt_projedit_errors').html('');
+			$('#pid').html(data.id);
 			$('#oldstatus').val(data.status);
-			var grp = data.mt_id.replace(/\d+$/,'');
-			$('input[name="descr"]').val(data.descr);
-			$('input[name="product"]').val(data.product);
-			$('select[name="mt_type"]').val(data.mt_type);
-			$('select[name="status"]').val(data.status);
-			$('select[name="priority"]').val(data.priority);
-			$('#assignedDiv2').html(data.aname);
-			$('#mt_assign_btn2').show();
-			$('textarea[name="comments"]').val(data.comments);
-			$('textarea[name="solution"]').val(data.solution);
-			$('#edtm').html(data.edtm);
-			$('#udtm').html(data.udtm);
-			$('#cdtm').html(data.cdtm);
-// 			$('#bdate').datepicker(
-// 			{
-// 				yearRange: '-80:+1',
-// 				changeMonth: true,
-// 				changeYear: true
-// 			});
-			$('#mtshow_div').hide();
-			$('#mtedit_div').show();
+			$('#projedit_cd').html(data.proj_cd);
+			$('#projedit_form1 input[name="proj_cd"]').val(data.proj_cd);
+			$('#client').html(data.client_name);
+			$('#projedit_form1 input[name="name"]').val(data.name);
+			$('#projedit_form1 input[name="po_nbr"]').val(data.po_nbr);
+			$('#projedit_form1 select[name="status"]').val(data.status);
+			$('#projedit_form1 select[name="priority"]').val(data.priority);
+			$('#projedit_form1 textarea[name="description"]').val(data.description);
+			$('#projedit_form1 input[name="hourly_rate"]').val(data.hourly_rate);
+			$('#projedit_form1 input[name="mileage_rate"]').val(data.mileage_rate);
+			$('#projedit_form1 input[name="distance"]').val(data.distance);
+			//$('#assignedDiv2').html(data.aname);
+			//$('#mt_assign_btn2').show();
+			$('#pedtm').html(data.edtm);
+			$('#pddt').val(data.ddt);
+			$('#psdt').val(data.sdt);
+			$('#pcdt').val(data.cdt);
+			wdb.hideview_content($('#projects_list'),$('#project_show_edit'));
+			$('#projshow_div').hide();
+			$('#projedit_div').show();
 		});
 		return false;
 	},
 
 	projshowdialog: function ( event, id )
 	{
-		wdb.showDialogDiv('WDD MyTime Project','mt_projs_show_edit');
+		wdb.showDialogDiv('WDD MyTime Project','project_show_edit');
 		wdb.projshow(event,id);
 		return false;
 	},
@@ -277,35 +320,40 @@ var wdb = // setup the wdb namespace
 		//var id2 = parseInt(id.replace(/[^\d]/g,''));
 		var params = "action=show&id="+id;
 		$.ajax({
-			url: 'proj_get',
+			url: 'mt_get_proj',
 			type: 'get',
 			data: params,
 			dataType: 'json'
 		}).done(function (data)
 		{
-			//console.log(data);
+			console.log(data);
 			wdb.proj_doc = data;
-			$('#mt_projs_show_edit').dialog('option','title','WDD MyTime Project '+data.mt_id);
+			//$('#mt_projs_show_edit').dialog('option','title','WDD MyTime Project '+data.mt_id);
 			$('#mt_admin_errors').html('');
 			$('#proj_cd').val(data.proj_cd);
 			$('#proj_cd2_v').html(data.proj_cd);
 			$('#pid').val(id);
-			$('#descr_v').html(data.descr);
-			$('#product_v').html(data.product);
-			$('#mt_v').html(wdb.get_lookup(wdb.group_data.mt_type,data.mt_type));
+			$('#client_v').html(data.client_name);
+			$('#name_v').html(data.name);
+			$('#po_nbr_v').html(data.po_nbr);
+			//$('#mt_v').html(wdb.get_lookup(wdb.group_data.mt_type,data.mt_type));
 			$('#status_v').html(data.status_descr);
 			$('#priority_v').html(data.priority_descr);
-			$('#assignedDiv1').html(data.aname);
-			$('#comments_v').html(data.comments);
-			$('#solution_v').html(data.solution);
-			$('#ename_v').html(data.ename);
-			$('#edtm_v').html(data.edtm);
-			$('#udtm_v').html(data.udtm);
-			$('#cdtm_v').html(data.cdtm);
-			wdb.get_files(event);
-			wdb.worklog_show(event,data);
-			wdb.mt_save_cancel();
-			$('#mtshow_div').show();
+			$('#description_v').html(data.description);
+			$('#hourly_rate_v').html(data.hourly_rate);
+			$('#mileage_rate_v').html(data.mileage_rate);
+			$('#distance_v').html(data.distance);
+			$('#ename_v').html(data.user_id);
+			$('#pedtm_v').html(data.edtm);
+			$('#pddt_v').html(data.ddt);
+			$('#sudt_v').html(data.sdt);
+			$('#pcdt_v').html(data.cdt);
+			//wdb.get_files(event);
+			//wdb.worklog_show(event,data);
+			//wdb.mt_save_cancel();
+			wdb.hideview_content($('#projects_list'),$('#project_show_edit'));
+			$('#projshow_div').show();
+			$('#projedit_div').hide();
 		});
 		return false;
 	},
@@ -642,6 +690,10 @@ var wdb = // setup the wdb namespace
 			$('#client_cd_v').html(data.client_cd);
 			$('#client_name_v').html(data.client_name);
 			$('#client_contact_v').html(data.contact_name);
+			$('#contacts_v').html('');
+			data.contacts_data.forEach((item, i) => {
+				$('#contacts_v').append(item.cname + '<br>');
+			});
 			$('#client_type_v').html(wdb.get_lookup(wdb.group_data.mt_type,data.type));
 			$('#client_hourly_rate_v').html(data.hourly_rate);
 			$('#client_mileage_rate_v').html(data.mileage_rate);
@@ -679,6 +731,11 @@ var wdb = // setup the wdb namespace
 			$('#clientedit_form1 input[name="client_cd"]').attr('readonly',true);
 			$('#clientedit_form1 input[name="client_name"]').val(data.client_name);
 			$('#clientedit_form1 select[name="client"]').val(data.client);
+			$('#client_contacts_hidden').val(data.contacts);
+			$('#client_contacts_div').html('');
+			data.contacts_data.forEach((item, i) => {
+				$('#client_contacts_div').append(item.cname + '<br>');
+			});
 			$('#clientedit_form1 select[name="client_type"]').val(data.type);
 			$('#clientedit_form1 input[name="hourly_rate"]').val(data.hourly_rate);
 			$('#clientedit_form1 input[name="mileage_rate"]').val(data.mileage_rate);
@@ -788,50 +845,6 @@ var wdb = // setup the wdb namespace
 	mthelp: function ( event )
 	{
 		wdb.showDialogDiv('MyTime Help','mthelp_div');
-		return false;
-	},
-
-	mt_proj_handler: function( event )
-	{
-		//alert('mt_proj_handler '+$('#projedit_form1').serialize()); return false;
-		debugger;
-		var err = wdb.validate_proj();
-		if (err != '')
-		{
-			$('#mt_projedit_errors').html('Errors encountered:<br>'+err);
-			return false;
-		}
-		$('#mt_projedit_errors').html('');
-		var params = 'action=add_update&'+$('#projedit_form1').serialize();
-		params += '&id='+$('#bid').val();
-		params += '&mt_id='+$('#mt_id').val();
-		params += '&user_id='+$('#userid').val();
-		//alert('mthandler '+params);
-		$.ajax({
-			url: 'mt_add_update',
-			type: 'post',
-			data: params,
-			dataType: 'html'
-		}).done(function (response)
-		{
-		    //console.log(response);
-			if (!/SUCCESS/.test(response))
-			{
-				$('#mtedit_errors').html(response);
-			}
-			else
-			{
-				wdb.mtlist(event);
-				if ($('#bid').val() == '') {
-				    wdb.mt_save_cancel(event);
-				    var arr = response.split(/ ,/);
-				    wdb.mtshow(event,arr[1]);
-				}
-				else wdb.mtshow(event,$('#bid').val());
-				//$('#mt_mts_list_edit').dialog('close');
-				//window.setTimeout(function(e) {$('#mtedit_div').dialog('close');},3000);
-			}
-		});
 		return false;
 	},
 
@@ -1068,7 +1081,7 @@ var wdb = // setup the wdb namespace
 	validate_client: function ( )
 	{
 		var err = '';
-		var codere = /^[A-Z][A-Za-z0-9]+$/;
+		var codere = /^[A-Z][A-Za-z]+$/;
 		var hoursre = /^[0-9]+([.][0-9]+)?$/;
 		var numre = /^[0-9]+$/;
 		var f = document.client_form1;
@@ -1119,19 +1132,37 @@ var wdb = // setup the wdb namespace
 	validate_proj: function ( )
 	{
 		var datere = /^[01][0-9]\/[0-3][0-9]\/(19|20)[0-9]{2}$/;
+		var hoursre = /^[0-9]+([.][0-9]+)?$/;
+		var numre = /^[0-9]+$/;
 		var err = '';
 		var f = document.proj_form1;
 		//alert(f.serialize()); return err;
+		if (f.client && f.client.value.blank())
+			err += ' - Client must be selected<br>';
 		if (f.name.value.blank())
 			err += ' - Name must not be blank<br>';
 		if (f.po_nbr.value.blank())
 			err += ' - PO Number must not be blank<br>';
+		if (f.priority.value.blank())
+			err += ' - Priority must be selected<br>';
+		if (f.hourly_rate.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (!hoursre.test(f.hourly_rate.value))
+			err += ' - Hourly Rate is not valid (decimal number)<br>';
+		if (!hoursre.test(f.mileage_rate.value))
+			err += ' - Mileage Rate is not valid (decimal number)<br>';
+		if (!numre.test(f.distance.value))
+			err += ' - Distance is not valid (integer)<br>';
 		// if (f.mt_type.value.blank())
 		// 	err += ' - Bug Type must be selected<br>';
 		// if (f.comments.value.blank())
 		// 	err += ' - Comments must not be blank<br>';
-	// 	if (!datere.test($('#bdate').val()))
-	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
+	 	if (f.due.value != '' && !datere.test(f.due.value))
+	 		err += ' - Due Date is not valid (mm/dd/yyyy)<br>';
+		if (f.started.value != '' && !datere.test(f.started.value))
+	 		err += ' - Start Date is not valid (mm/dd/yyyy)<br>';
+		if (f.completed.value != '' && !datere.test(f.completed.value))
+	 		err += ' - Complete Date is not valid (mm/dd/yyyy)<br>';
 		return err;
 	},
 
@@ -1553,6 +1584,32 @@ var wdb = // setup the wdb namespace
 		return obj;
 	},
 
+	build_client_selection: function ( name )
+	{
+		//debugger;
+		var obj = $('<select></select>').attr('name',name);
+		var opt = $('<option></option>').attr('value','').html('--Select One--');
+		obj.append(opt);
+		var params = 'action=mt_clients_data';
+		$.ajax({
+			url: 'mt_clients_list',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			for (var i=0; i<data.data.length; ++i)
+			{
+				var rec = data.data[i];
+				//console.log(rec);
+				var opt = $('<option></option>').attr('value',rec._id + ',' + rec.client_cd).html(rec.client_name);
+				obj.append(opt);
+			}
+		});
+		//console.log(obj);
+		return obj;
+	},
+
 	build_contact_selection: function ( name )
 	{
 		//debugger;
@@ -1608,6 +1665,13 @@ var wdb = // setup the wdb namespace
 	},
 
 	select_contacts: function ( event ) {
+		var ids = $('#client_contacts_hidden').val().split(',');
+		//console.log(ids);
+		$('#contacts_checkboxes input[type="checkbox"]').removeAttr('checked');
+		ids.forEach((item, i) => {
+			//console.log(item);
+			$('#contacts_checkboxes input:checkbox[value^="' + item + '"]').prop('checked',true);
+		});
 		wdb.showDialogDiv('MyTime Contacts Selections','contacts_selections');
 		$('#contacts_checkboxes input[type="checkbox"]').on('click',wdb.toggle_contacts);
 		return false;
@@ -1716,7 +1780,7 @@ var wdb = // setup the wdb namespace
 		$('#mt_user_edit_cancel').on('click',wdb.user_edit_cancel);
 		$('#contact_show_buttons span').button();
 		$('#client_show_buttons span').button();
-		$('#mt_show_buttons span').button();
+		$('#proj_show_buttons span').button();
 		$('#mt_admin_btn').show();
 		var params = 'action=mt_init';
 		$.ajax({
@@ -1746,8 +1810,16 @@ var wdb = // setup the wdb namespace
 			$('#client_contact_div').empty().append(sel);
 			var sel = wdb.build_contacts_checkboxes('contacts');
 			$('#contacts_checkboxes').empty().append(sel);
+			var sel = wdb.build_client_selection('client');
+			$('#client').empty().append(sel);
+			$('.projdate').datepicker(
+			{
+				yearRange: '-5:+10',
+				changeMonth: true,
+				changeYear: true
+			});
 			//$('#contacts_checkboxes input[type="checkbox"]').on('click',wdb.toggle_contacts);
-			console.log(sel);
+			//console.log(sel);
 		});
 	}
 

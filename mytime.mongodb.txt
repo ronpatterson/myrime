@@ -68,11 +68,13 @@ db.clients {
 db.projects {
     "_id" : ObjectId,
     "proj_cd" : string, // client_cd.seq
-    "client_cd" : ObjectId, // clients
+    "client_id" : ObjectId, // clients
     "name" : string,
+    "user_id" : string,
     "po_nbr" : string,
     "priority" : char, // mt_priority
     "status" : char, // mt_status
+    "description" : string,
     "hourly_rate" : decimal,
     "mileage_rate" : decimal,
     "distance" : decimal,

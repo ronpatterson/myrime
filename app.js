@@ -126,6 +126,10 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 		wdb.get_client(db, req, res);
 	});
 
+	app.get('/mt_get_client_contacts', function(req, res) {
+		wdb.get_client_contacts(db, req, res);
+	});
+
 	app.post('/mt_add_update_client', function(req, res, next) {
 		wdb.client_add_update(db, req, res, next);
 	});

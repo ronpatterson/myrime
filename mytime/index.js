@@ -18,7 +18,8 @@ const adir = '/usr/local/data/',
 	smtp_host = 'smtp.postoffice.net',
 	smtp_user = 'ron.patterson%40usa.net',
 	smtp_pw = 'xxxx',
-    dateFmt1 = 'mm/dd/yyyy h:MM tt';
+	dateFmt1 = 'mm/dd/yyyy h:MM tt',
+    dateFmt2 = 'mm/dd/yyyy';
 
 var lookups = [];
 
@@ -64,19 +65,31 @@ module.exports = function() {
 			// var crit0 = req.query.crit;
 			// if (crit0 && crit0.length > 1)
 			//   crit = {'$and':crit0};
-			var cursor = db.collection('projects').find(crit);
+			// join to get client name
+			var cursor = db.collection('projects').aggregate([
+				{ '$match': crit },
+				{ '$sort': {'proj_cd':1} },
+				{ '$lookup':
+					{
+						from: 'clients',
+						localField: 'client_id',
+						foreignField: '_id',
+						as: 'client_info'
+					}
+				}
+			]);
 			//console.log(cursor);
-			cursor.sort({'proj_cd':1});
 			cursor.forEach((doc) => {
-			//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
-			//console.log(doc);
-			doc.entry_dtm = dateFormat(doc.dates.entered,dateFmt1);
-			doc.status = getWDDlookup("status",doc.status);
-			results.push(doc);
+				//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
+				//console.log(doc);
+				doc.entry_dtm = dateFormat(doc.dates.entered,dateFmt2);
+				doc.status = getWDDlookup("mt_status",doc.status);
+				doc.client = doc.client_info[0].client_name;
+				results.push(doc);
 			}, (err) => {
 				assert.equal(null, err);
 				results = {'data':results};
-				//console.log(results);
+				//console.log(results.data);
 				res.json(results);
 				res.end();
 			});
@@ -84,73 +97,85 @@ module.exports = function() {
 
         get_proj: (db, req, res) => {
             var id = req.query.id;
-            db.collection('projects')
-            .findOne(
-                { '_id': new ObjectId(id) },
-                (err, proj) => {
-                    assert.equal(null, err);
-                    proj.status_descr = getWDDlookup("status",proj.status);
-                    proj.priority_descr = getWDDlookup("priority",proj.priority);
-                    //var bt = getWDDlookup("type",bug.bug_type);
-                    proj.edtm = dateFormat(proj.dates.entered,dateFmt1);
-                    proj.ddtm = typeof(proj.dates.due) == 'undefined' ? '' : dateFormat(proj.dates.due,dateFmt1);
-                    proj.sdtm = typeof(proj.dates.started) == 'undefined' ? '' : dateFormat(proj.dates.started,dateFmt1);
-                    proj.cdtm = typeof(proj.dates.completed) == 'undefined' ? '' : dateFormat(proj.dates.completed,dateFmt1);
-                    if (typeof(proj.attachments) != 'undefined') {
-                        for (var i=0; i<proj.attachments.length; ++i) {
-                            proj.attachments[i].edtm = typeof(proj.attachments[i].entry_dtm) == 'undefined' ? '' : dateFormat(proj.attachments[i].entry_dtm,dateFmt1);
-                        }
+			db.collection('projects').aggregate([
+				{ '$match': { '_id': new ObjectId(id) } },
+			    { '$lookup':
+					{
+						from: 'clients',
+						localField: 'client_id',
+						foreignField: '_id',
+						as: 'client_info'
+					}
+				},
+				{ '$addFields': { client_name: '$client_info.client_name' } }
+			]).toArray( (err, results) => {
+				var proj = results[0];
+                assert.equal(null, err);
+                proj.status_descr = getWDDlookup("mt_status",proj.status);
+                proj.priority_descr = getWDDlookup("mt_priority",proj.priority);
+                //var bt = getWDDlookup("type",bug.bug_type);
+                proj.edtm = dateFormat(proj.dates.entered,dateFmt1);
+                proj.ddt = typeof(proj.dates.due) == 'undefined' || !proj.dates.due ? '' : dateFormat(proj.dates.due,dateFmt2);
+                proj.sdt = typeof(proj.dates.started) == 'undefined' || !proj.dates.started ? '' : dateFormat(proj.dates.started,dateFmt2);
+                proj.cdtm = typeof(proj.dates.completed) == 'undefined' || !proj.dates.completed ? '' : dateFormat(proj.dates.completed,dateFmt2);
+                if (typeof(proj.attachments) != 'undefined') {
+                    for (var i=0; i<proj.attachments.length; ++i) {
+                        proj.attachments[i].edtm = typeof(proj.attachments[i].entry_dtm) == 'undefined' ? '' : dateFormat(proj.attachments[i].entry_dtm,dateFmt1);
                     }
-                    //console.log(proj);
-                    res.json(proj);
-                    res.end();
                 }
-            );
+                //console.log(proj);
+                res.json(proj);
+                res.end();
+            });
         },
 
         add_update_proj: (db, req, res, next) => {
             //console.log(req.body); res.end('TEST'); return;
+			var doc = {
+  "proj_cd": ''
+, "name": req.body.name
+, "user_id": req.body.user_id
+, "po_nbr": req.body.po_nbr
+, "priority": req.body.priority
+, "status": req.body.status
+, "description": req.body.description
+, "hourly_rate": req.body.hourly_rate
+, "mileage_rate": req.body.mileage_rate
+, "distance": req.body.distance
+, "dates": {}
+};
             if (typeof(req.body['id']) == 'undefined' || req.body.id == '') { // add
+				console.log(req);
 				// assign a project code
-                db.collection('counters').findAndModify (
+                db.collection('counters').findOneAndUpdate (
                     { "_id": 'proj_cd' },
-                    [ ],
                     { '$inc': { 'seq': 1 } },
                     {
-                        "new": true,
-                        "upsert": true
+						"returnNewDocument": true,
+						"upsert": true
                     },
                     (err, updoc) => {
                         assert.equal(null, err);
                         console.log(updoc);
-                        var id = updoc.value.seq;
-                        var proj_cd = req.body.client_cd + id;
-                        var iid = new ObjectId();
-                        var doc = {
-  "_id": iid
-, "proj_cd": proj_cd
-, "client_id": req.client_id
-, "name": req.body.name
-, "po_nbr": req.body.po_nbr
-, "priority": req.body.priority
-, "status": req.body.status
-, "hourly_rate": req.body.hourly_rate
-, "mileage_rate": req.body.mileage_rate
-, "distance": req.body.distance
-, "dates.entered": new Date(req.body.entered)
-, "dates.due": new Date(req.body.due)
-, "dates.started": new Date(req.body.started)
-, "dates.completed": new Date(req.body.completed)
-};
+                        var id = updoc.value.seq.valueOf();
+						var client_cd = req.body.client.split(',');
+						doc.client_id = new ObjectId(client_cd[0]);
+                        doc.proj_cd = client_cd[1] + id;
+						doc.dates = {
+							"entered": new Date(),
+							"due": req.body.due != "" ? new Date(req.body.due) : null,
+							"started": req.body.started != "" ? new Date(req.body.started) : null,
+							"completed": req.body.completed != "" ? new Date(req.body.completed) : null
+						}
                         //console.log(doc); res.end('TEST'); return;
                         db.collection('projects')
-                        .insert(
+                        .insertOne(
                             doc,
                             (err, result) => {
                                 assert.equal(err, null);
                                 console.log("Inserted a document into the projects collection.");
                                 //console.log(result);
-                                res.send('SUCCESS '+iid+','+bug_id);
+                                res.send('SUCCESS '+id+','+doc.proj_cd);
                                 res.end();
                             }
                         );
@@ -158,22 +183,12 @@ module.exports = function() {
                 )
             }
             else { // update
-                var bid = req.body.proj_cd.replace(/.*(\d+)$/,'$1');
-                var proj_cd = req.body.group + bid;
-                var doc = {
-  "proj_cd": proj_cd
-, "client_id": req.client_id
-, "name": req.body.name
-, "po_nbr": req.body.po_nbr
-, "priority": req.body.priority
-, "status": req.body.status
-, "hourly_rate": req.body.hourly_rate
-, "mileage_rate": req.body.mileage_rate
-, "distance": req.body.distance
-, "dates.due": new Date(req.body.due)
-, "dates.started": new Date(req.body.started)
-, "dates.completed": new Date(req.body.completed)
-};
+                var pid = req.body.proj_cd.replace(/.*(\d+)$/,'$1');
+                var proj_cd = req.body.proj_cd;
+				delete doc.proj_cd;
+				doc.dates.due = req.body.due != "" ? new Date(req.body.due) : null;
+				doc.dates.started = req.body.started != "" ? new Date(req.body.started) : null;
+				doc.dates.completed = req.body.completed != "" ? new Date(req.body.completed) : null;
                 //console.log(doc); res.end('TEST'); return;
                 var id = req.body.id;
                 db.collection('projects')
@@ -182,7 +197,7 @@ module.exports = function() {
                     { '$set': doc },
                     (err, result) => {
                         assert.equal(err, null);
-                        //console.log("Updated a document in the projects collection.");
+                        console.log("Updated a document in the projects collection.");
                         //console.log(result);
                         res.send('SUCCESS');
                         res.end();
@@ -266,13 +281,13 @@ module.exports = function() {
 			var id = req.body.id;
 			db.collection('projects')
 			.removeOne(
-			{ '_id': new ObjectId(id) },
-			(err, result) => {
-				  assert.equal(err, null);
-				  console.log("Removed document from the projects collection.");
-				  //console.log(result);
-				  res.send('SUCCESS');
-				  res.end();
+				{ '_id': new ObjectId(id) },
+				(err, result) => {
+					assert.equal(err, null);
+					console.log("Removed document from the projects collection.");
+					//console.log(result);
+					res.send('SUCCESS');
+					res.end();
 				}
 			);
 		},
@@ -326,17 +341,17 @@ module.exports = function() {
 , "fname": req.body.fname
 , "email": req.body.email
 , "address": {
-  "number": req.body.addr_number
-, "street": req.body.addr_street
-, "city": req.body.addr_city
-, "state": req.body.addr_state
-, "zip": req.body.addr_zip
-, "country": req.body.addr_country
+	  "number": req.body.addr_number
+	, "street": req.body.addr_street
+	, "city": req.body.addr_city
+	, "state": req.body.addr_state
+	, "zip": req.body.addr_zip
+	, "country": req.body.addr_country
 }
 , "phone": {
-  "work": req.body.work
-, "cell": req.body.cell
-, "fax": req.body.fax
+	  "work": req.body.work
+	, "cell": req.body.cell
+	, "fax": req.body.fax
 }
 , "active": req.body.active
 };
@@ -444,34 +459,36 @@ module.exports = function() {
 
 		get_client: (db, req, res) => {
             var id = req.query.id;
-            db.collection('clients')
-            .findOne(
-                { '_id': new ObjectId(id) },
-                (err, client) => {
-                    assert.equal(null, err);
-                    client.edtm = dateFormat(client.entry_dtm,dateFmt1);
-                    client.udtm = typeof(client.update_dtm) == 'undefined' ? '' : dateFormat(client.update_dtm,dateFmt1);
-					// debugger;
-					if (client.client != '') {
-						db.collection('contacts')
-			            .findOne(
-			                { '_id': new ObjectId(client.client) },
-			                (err, contact) => {
-			                    assert.equal(null, err);
-								client.contact_name = contact.cname;
-								console.log(client);
-			                    res.json(client);
-			                    res.end();
-							}
-						);
+			// join to contacts twice
+			db.collection('clients').aggregate([
+				{ '$match': { '_id': new ObjectId(id) } },
+			    { '$lookup':
+					{
+						from: 'contacts',
+						localField: 'client',
+						foreignField: '_id',
+						as: 'contact_info'
 					}
-					else {
-						console.log(client);
-						res.json(client);
-						res.end();
+				},
+				{ '$addFields': { contact_name: '$contact_info.cname' } },
+				{ '$unwind': '$contact_info' },
+				{ '$lookup':
+					{
+						from: 'contacts',
+						localField: 'contacts',
+						foreignField: '_id',
+						as: 'contacts_data'
 					}
-                }
-            );
+				},
+				{ '$sort': {'name':1} }
+			]).toArray( (err, results) => {
+				var res2 = results[0];
+				//console.log('results:',res2);
+				res2.edtm = dateFormat(res2.entry_dtm,dateFmt1);
+				res2.udtm = typeof(res2.update_dtm) == 'undefined' ? '' : dateFormat(res2.update_dtm,dateFmt1);
+				res.json(res2);
+				res.end();
+			});
         },
 
 		get_client_contacts: (db, req, res, next) => {
@@ -484,12 +501,11 @@ module.exports = function() {
             db.collection('contacts')
             .find(
                 { '_id': { '$in': ids } },
-                (err, contact) => {
+                (err, contacts) => {
                     assert.equal(null, err);
-                    contact.edtm = dateFormat(contact.entry_dtm,dateFmt1);
-                    contact.udtm = typeof(contact.update_dtm) == 'undefined' ? '' : dateFormat(contact.update_dtm,dateFmt1);
-                    console.log(contact);
-                    res.json(contact);
+					var contacts2 = contacts.toArray();
+                    console.log(contacts2);
+                    res.json(contacts2);
                     res.end();
                 }
             );
@@ -825,6 +841,7 @@ Comments: " + row.comments + "\n";
             // check action
             //console.log(req.body); res.end('TEST'); return;
             var type = req.body.lu_type;
+			// setup db document
             var doc = {
   "cd": req.body.cd
 , "descr": req.body.descr
@@ -935,10 +952,8 @@ Comments: " + row.comments + "\n";
         user_add_update: (db, req, res, next) => {
             // uid, lname, fname, email, active, roles, pw, group
             var pw5 = crypto.createHash('md5').update(req.body.pw).digest("hex");
-            // check action
-            //console.log(req.body); res.end('TEST'); return;
-            if (req.body.id == '') { // add
-                var doc = {
+			// setup db document
+			var doc = {
   "uid": req.body.uid2
 , "lname": req.body.lname
 , "fname": req.body.fname
@@ -948,6 +963,9 @@ Comments: " + row.comments + "\n";
 , "pw": pw5
 , "group": req.body.group
 };
+            // check action
+            //console.log(req.body); res.end('TEST'); return;
+            if (req.body.id == '') { // add
                 var rec = db.collection('users')
                 .insert(
                     doc,
@@ -962,16 +980,8 @@ Comments: " + row.comments + "\n";
             }
             else { // update
                 if (req.body.pw == req.body.pw2) pw5 = req.body.pw;
-                else pw5 = crypto.createHash('md5').update(req.body.pw).digest("hex");;
-                var doc = {
-  "lname": req.body.lname
-, "fname": req.body.fname
-, "email": req.body.email
-, "active": req.body.active
-, "roles": [req.body.roles]
-, "pw": pw5
-, "group": req.body.group
-};
+                else pw5 = crypto.createHash('md5').update(req.body.pw).digest("hex");
+				delete doc.uid; // don't change
                 var id = req.body.id;
                 var rec = db.collection('users')
                 .updateOne(

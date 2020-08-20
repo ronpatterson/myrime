@@ -279,6 +279,8 @@
 						<div class="fields2"><span id="priority_v"></span></div><br class="clear">
 						<label>Status:</label>
 						<div class="fields2"><span id="status_v"></span></div><br class="clear">
+						<label>Description:</label>
+						<div class="fields2"><span id="description_v"></span></div><br class="clear">
 						<label>Hourly Rate:</label>
 						<div class="fields2"><span id="hourly_rate_v"></span></div><br class="clear">
 						<label>Mileage Rate:</label>
@@ -290,16 +292,18 @@
 						<label>Links:</label>
 						<div class="fields2"><div id="linksDiv"></div> <input type="button" id="links_btn1" value="Add Link" onclick="return bt.add_link();"></div><br class="clear">
 						<label>Entry Date/Time:</label>
-						<div class="fields2"><span id="edtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="pedtm_v"></span></div><br class="clear">
 						<label>Due Date/Time:</label>
-						<div class="fields2"><span id="ddtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="pddt_v"></span></div><br class="clear">
 						<label>Started Date/Time:</label>
-						<div class="fields2"><span id="sdtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="psdt_v"></span></div><br class="clear">
 						<label>Completed Date/Time:</label>
-						<div class="fields2"><span id="cdtm_v"></span></div><br class="clear">
+						<div class="fields2"><span id="pcdt_v"></span></div><br class="clear">
+						<label>User:</label>
+						<div class="fields2"><span id="ename_v"></span></div><br class="clear">
 					</fieldset>
 					<br>
-					<div align="center" id="show_buttons">
+					<div align="center" id="proj_show_buttons">
 						<span onclick="return wdb.edit_project(event);">Edit Project</span>
 						<span onclick="return wdb.delete_project(event);">Delete Project</span>
 						<span onclick="return wdb.show_email(event);">Email Project</span>
@@ -307,46 +311,51 @@
 					</div>
 					<br>
 					<fieldset>
-					<legend>Project Worklog</legend>
-					<div id="worklog_div"></div>
+						<legend>Project Worklog</legend>
+						<div id="worklog_div"></div>
 					</fieldset>
 				</div>
 
-				<div id="projedit_div" class="projform content_divs" style="text-align: left; width: 580px;">
+				<div id="projedit_div" class="projform content_divs" style="text-align: left; width: 600px;">
 					<form name="proj_form1" id="projedit_form1"><br>
-					<input type="hidden" name="oldstatus" id="oldstatus" value="">
-					<fieldset>
-						<legend> WDD MyTime Project Record </legend>
-						<label>ID:</label>
-						<div class="fields2"><span id="bugedit_id"></span></div><br class="clear">
-						<label for="group"><span class="required">*</span>Client:</label>
-						<div class="fields2"><span id="client"></span></div><br class="clear">
-						<label for="name"><span class="required">*</span>Name:</label>
-						<div class="fields2"><input type="text" name="name" size="35" value=""></div><br class="clear">
-						<label for="po_nbr"><span class="required">*</span>PO Number:</label>
-						<div class="fields2"><input type="text" name="po_nbr" size="20" value=""></div><br class="clear">
-						<label for="priority"><span class="required">*</span>Priority:</label>
-						<div class="fields2"><span id="priority_s"></span></div><br class="clear">
-						<label for="status">Status:</label>
-						<div class="fields2"><span id="status_s"></span></div><br class="clear">
-						<label for="hourly_rate"><span class="required">*</span>Hourly Rate:</label>
-						<div class="fields2"><input type="text" name="hourly_rate" size="10" value=""></div><br class="clear">
-						<label for="mileage_rate"><span class="required">*</span>Mileage Rate:</label>
-						<div class="fields2"><input type="text" name="mileage_rate" size="10" value=""></div><br class="clear">
-						<label for="distance"><span class="required">*</span>Distance:</label>
-						<div class="fields2"><input type="text" name="distance" size="10" value=""></div><br class="clear">
-						<label>Entry Date/Time:</label>
-						<div class="fields2"><span id="edtm" class="date"></span></div><br class="clear">
-						<label>Due Date/Time:</label>
-						<div class="fields2"><span id="ddtm" class="date"></span></div><br class="clear">
-						<label>Started Date/Time:</label>
-						<div class="fields2"><span id="sdtm" class="date"></span></div><br class="clear">
-						<label>Completed Date/Time:</label>
-						<div class="fields2"><span id="cdtm" class="date"></span></div><br class="clear">
-						<label>&nbsp;</label>
-						<div class="fields2"><input type="submit" value="SAVE"> <input
-				 type="button" id="proj_edit_cancel" value="Cancel"></div><br class="clear">
-					</fieldset>
+						<input type="hidden" name="proj_cd" value="">
+						<input type="hidden" name="oldstatus" value="">
+						<fieldset>
+							<legend> WDD MyTime Project Record </legend>
+							<label>ID:</label>
+							<div class="fields2"><span id="projedit_cd"></span></div><br class="clear">
+							<label for="group"><span class="required">*</span>Client:</label>
+							<div class="fields2"><span id="client"></span></div><br class="clear">
+							<label for="name"><span class="required">*</span>Name:</label>
+							<div class="fields2"><input type="text" name="name" size="35" value=""></div><br class="clear">
+							<label for="po_nbr"><span class="required">*</span>PO Number:</label>
+							<div class="fields2"><input type="text" name="po_nbr" size="20" value=""></div><br class="clear">
+							<label for="priority"><span class="required">*</span>Priority:</label>
+							<div class="fields2"><span id="priority_s"></span></div><br class="clear">
+							<label for="status">Status:</label>
+							<div class="fields2"><span id="status_s"></span></div><br class="clear">
+							<label for="description">Description:</label>
+							<div class="fields2"><textarea id="description" name="description" rows="3" cols="40"></textarea></div><br class="clear">
+							<label for="hourly_rate"><span class="required">*</span>Hourly Rate:</label>
+							<div class="fields2"><input type="text" name="hourly_rate" size="10" value=""> Dollars</div><br class="clear">
+							<label for="mileage_rate"><span class="required">*</span>Mileage Rate:</label>
+							<div class="fields2"><input type="text" name="mileage_rate" size="10" value=""> Dollars</div><br class="clear">
+							<label for="distance"><span class="required">*</span>Distance:</label>
+							<div class="fields2"><input type="text" name="distance" size="10" value=""> Miles</div><br class="clear">
+							<fieldset>
+								<legend>Project Dates</legend>
+								<label>Entry Date/Time:</label>
+								<div class="fields2"><span id="pedtm" class="date"></span></div><br class="clear">
+								<label>Due Date:</label>
+								<div class="fields2"><input id="pddt" name="due" class="projdate" size="12"> (mm/dd/yyyy)</div><br class="clear">
+								<label>Started Date:</label>
+								<div class="fields2"><input id="psdt" name="started" class="projdate" size="12"> (mm/dd/yyyy)</div><br class="clear">
+								<label>Completed Date:</label>
+								<div class="fields2"><input id="pcdt" name="completed" class="projdate" size="12"> (mm/dd/yyyy)</div><br class="clear">
+							</fieldset>
+							<label>&nbsp;</label>
+							<div class="fields2"><input type="submit" value="SAVE"> <input type="button" id="proj_edit_cancel" value="Cancel"></div><br class="clear">
+						</fieldset>
 					</form>
 					<br>
 					<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
