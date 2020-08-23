@@ -39,20 +39,6 @@
 
 		<div id="maincontent">
 
-			<div id="projects_list" class="content_divs">
-				<p><input type="button" id="mt_add_project_btn" value="Add Project">
-				Click on Show to see details. Click column title to sort.</p>
-				<div style="width: 750px;">
-				<table id="mt_proj_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
-					<thead>
-					<tr>
-					<th>ID</th><th>Name</th><th>Client</th><th>Date entered</th><th>Status</th><th>&nbsp;</th>
-					</tr>
-					</thead>
-				</table>
-				</div>
-			</div>
-
 			<div id="contacts_list" class="content_divs">
 				<p><input type="button" id="mt_add_contact_btn" value="Add Contact">
 				Click on Show to see details. Click column title to sort.</p>
@@ -263,6 +249,20 @@
 				</div>
 			</div> <!-- end of client_show_edit -->
 
+			<div id="projects_list" class="content_divs">
+				<p><input type="button" id="mt_add_project_btn" value="Add Project">
+				Click on Show to see details. Click column title to sort.</p>
+				<div style="width: 750px;">
+				<table id="mt_proj_tbl" class="display" border="1" cellspacing="0" cellpadding="3" width="100%">
+					<thead>
+					<tr>
+					<th>ID</th><th>Name</th><th>Client</th><th>Date entered</th><th>Status</th><th>&nbsp;</th>
+					</tr>
+					</thead>
+				</table>
+				</div>
+			</div>
+
 			<div id="project_show_edit" class="content_divs">
 				<div id="projshow_div" class="projform content_divs">
 					<fieldset>
@@ -288,9 +288,9 @@
 						<label>Distance:</label>
 						<div class="fields2"><span id="distance_v"></span></div><br class="clear">
 						<label>Attachments:</label>
-						<div class="fields2"><div id="filesDiv"></div> <input type="button" id="assign_btn1" value="Attach File" onclick="return bt.attach_file();"></div><br class="clear">
+						<div class="fields2"><div id="filesDiv"></div> <input type="button" id="assign_btn1" value="Attach File" onclick="return wdb.attach_file();"></div><br class="clear">
 						<label>Links:</label>
-						<div class="fields2"><div id="linksDiv"></div> <input type="button" id="links_btn1" value="Add Link" onclick="return bt.add_link();"></div><br class="clear">
+						<div class="fields2"><div id="linksDiv"></div> <input type="button" id="links_btn1" value="Add Link" onclick="return wdb.add_link();"></div><br class="clear">
 						<label>Entry Date/Time:</label>
 						<div class="fields2"><span id="pedtm_v"></span></div><br class="clear">
 						<label>Due Date/Time:</label>
@@ -309,6 +309,11 @@
 						<span onclick="return wdb.show_email(event);">Email Project</span>
 						<span onclick="return wdb.add_proj_notes(event);">Add Notes</span>
 					</div>
+					<br>
+					<fieldset>
+						<legend>Project Notes</legend>
+						<div id="notes_div"></div>
+					</fieldset>
 					<br>
 					<fieldset>
 						<legend>Project Worklog</legend>

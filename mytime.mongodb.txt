@@ -78,8 +78,8 @@ db.projects {
     "hourly_rate" : decimal,
     "mileage_rate" : decimal,
     "distance" : decimal,
+    "entry_dtm" : ISODate,
     "dates" : {
-        "entered" : ISODate,
         "due" : ISODate,
         "started" : ISODate,
         "completed" : ISODate

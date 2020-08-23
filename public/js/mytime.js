@@ -348,8 +348,8 @@ var wdb = // setup the wdb namespace
 			$('#pddt_v').html(data.ddt);
 			$('#sudt_v').html(data.sdt);
 			$('#pcdt_v').html(data.cdt);
-			//wdb.get_files(event);
-			//wdb.worklog_show(event,data);
+			wdb.get_files(event);
+			wdb.worklog_show(event,data);
 			//wdb.mt_save_cancel();
 			wdb.hideview_content($('#projects_list'),$('#project_show_edit'));
 			$('#projshow_div').show();
@@ -815,8 +815,9 @@ var wdb = // setup the wdb namespace
 
 	worklog_show: function ( event, data )
 	{
-		$('#mt_worklog_div').empty();
-		var div = $('#mt_worklog_div');
+		//$('#worklog_div').empty();
+		$('#worklog_div').html('No Worklog entries'); return false;
+		var div = $('#worklog_div');
 		if (!data.worklog || data.worklog.length == 0)
 			div.html('No worklog records');
 		else
@@ -996,15 +997,15 @@ var wdb = // setup the wdb namespace
 	{
 		$('#filesDiv').empty();
         var out = '';
-        var data = typeof(wdb.mt_doc.attachments) == 'object' ? wdb.mt_doc.attachments : [];
+        var data = typeof(wdb.proj_doc.attachments) == 'object' ? wdb.proj_doc.attachments : [];
         if (data.length == 0)
             out = 'No attachments';
         else
         {
             $.each(data,function (i)
             {
-                var id = $('#bid').val();
-                out += '<a href="src/get_file.html?id='+id+'&idx='+i+'" target="_blank">'+data[i].file_name+'</a> ('+data[i].file_size+') <span onclick="return wdb.remove_file(\''+id+'\','+i+');" style="cursor: pointer;">Remove</span><br>';
+                var id = $('#pid').val();
+                out += '<a href="get_attachment?id='+id+'&idx='+i+'" target="_blank">'+data[i].file_name+'</a> ('+data[i].file_size+') <span onclick="return wdb.remove_attachment(\''+id+'\','+i+');" style="cursor: pointer;">Remove</span><br>';
             });
         }
         $('#filesDiv').html(out);
@@ -1016,7 +1017,7 @@ var wdb = // setup the wdb namespace
 		$('#update_list').val("0");
 		//alert("add_file called");
 //		w = window.open('views/add_file.html?id='+$('#bid').val()+'&mt_id='+$('#mt_id').val(), 'Add_file', 'width=620,height=280,resizable,menubar,scrollbars');
-		w = window.open('src/add_file.html?id='+$('#bid').val()+'&mt_id='+$('#mt_id').val(), 'Add_file', 'width=620,height=280,resizable,menubar,scrollbars');
+		w = window.open('src/add_file.html?id='+$('#pid').val(), 'Add_file', 'width=620,height=280,resizable,menubar,scrollbars');
 		//setTimeout("watch_add(w)",2000);
 		wdb.get_files(event);
 		return false;

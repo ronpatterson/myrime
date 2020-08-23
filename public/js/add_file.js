@@ -5,6 +5,14 @@
 
 var w = "";
 
+function init () {
+	var urlParams = new URLSearchParams(window.location.search);
+	// console.log(urlParams.has('id')); // true
+	// console.log(urlParams.get('id')); // "edit"
+	$('#id').val(urlParams.get('id'));
+	return true;
+}
+
 function upload_file () {
 	$('#errors').html('Uploading...');
 	return true;

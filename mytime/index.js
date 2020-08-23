@@ -10,8 +10,6 @@ const ObjectId = require('mongodb').ObjectID,
 	dateFormat = require('dateformat'),
 	crypto = require('crypto'),
 	mailer = require("nodemailer"),
-	multer = require('multer'),
-	upload = multer(), // for parsing multipart/form-data
 	assert = require('assert');
 
 const adir = '/usr/local/data/',
@@ -82,7 +80,7 @@ module.exports = function() {
 			cursor.forEach((doc) => {
 				//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
 				//console.log(doc);
-				doc.entry_dtm = dateFormat(doc.dates.entered,dateFmt2);
+				doc.entry_dtm = dateFormat(doc.entry_dtm,dateFmt2);
 				doc.status = getWDDlookup("mt_status",doc.status);
 				doc.client = doc.client_info[0].client_name;
 				results.push(doc);
@@ -114,7 +112,7 @@ module.exports = function() {
                 proj.status_descr = getWDDlookup("mt_status",proj.status);
                 proj.priority_descr = getWDDlookup("mt_priority",proj.priority);
                 //var bt = getWDDlookup("type",bug.bug_type);
-                proj.edtm = dateFormat(proj.dates.entered,dateFmt1);
+                proj.edtm = dateFormat(proj.entry_dtm,dateFmt1);
                 proj.ddt = typeof(proj.dates.due) == 'undefined' || !proj.dates.due ? '' : dateFormat(proj.dates.due,dateFmt2);
                 proj.sdt = typeof(proj.dates.started) == 'undefined' || !proj.dates.started ? '' : dateFormat(proj.dates.started,dateFmt2);
                 proj.cdtm = typeof(proj.dates.completed) == 'undefined' || !proj.dates.completed ? '' : dateFormat(proj.dates.completed,dateFmt2);
@@ -161,8 +159,8 @@ module.exports = function() {
 						var client_cd = req.body.client.split(',');
 						doc.client_id = new ObjectId(client_cd[0]);
                         doc.proj_cd = client_cd[1] + id;
+						doc.entry_dtm = new Date();
 						doc.dates = {
-							"entered": new Date(),
 							"due": req.body.due != "" ? new Date(req.body.due) : null,
 							"started": req.body.started != "" ? new Date(req.body.started) : null,
 							"completed": req.body.completed != "" ? new Date(req.body.completed) : null
@@ -186,9 +184,11 @@ module.exports = function() {
                 var pid = req.body.proj_cd.replace(/.*(\d+)$/,'$1');
                 var proj_cd = req.body.proj_cd;
 				delete doc.proj_cd;
-				doc.dates.due = req.body.due != "" ? new Date(req.body.due) : null;
-				doc.dates.started = req.body.started != "" ? new Date(req.body.started) : null;
-				doc.dates.completed = req.body.completed != "" ? new Date(req.body.completed) : null;
+				doc.dates = {
+					"due": req.body.due != "" ? new Date(req.body.due) : null,
+					"started": req.body.started != "" ? new Date(req.body.started) : null,
+					"completed": req.body.completed != "" ? new Date(req.body.completed) : null
+				}
                 //console.log(doc); res.end('TEST'); return;
                 var id = req.body.id;
                 db.collection('projects')
@@ -744,8 +744,7 @@ Comments: " + row.comments + "\n";
         },
 
         attachment_add: (db, req, res, next) => {
-            upload.single('upfile');
-            //console.log(req.body); console.log(req.file); res.end('SUCCESS'); return;
+            //console.log('Upload:',req,req.file); res.end('SUCCESS'); return;
 /*
 { fieldname: 'upfile',
   originalname: 'hsm_dates.txt',
@@ -755,14 +754,16 @@ Comments: " + row.comments + "\n";
   size: 220 }
 */
             var id = req.body.id;
-            var raw_file = req.file.buffer;
+			var upfile = req.files.upfile;
+            var raw_file = upfile.data;
             var hash = crypto.createHash('md5').update(raw_file).digest("hex");
             var doc = {
-  "file_name": req.file.originalname
-, "file_size": req.file.size
+  "file_name": upfile.name
+, "file_size": upfile.size
 , "file_hash": hash
 , "entry_dtm": new Date()
 };
+			//console.log('upfile:',id,doc); res.end('SUCCESS'); return;
             var rec = db.collection('projects')
             .updateOne(
                 { '_id': new ObjectId(id) },
@@ -774,16 +775,40 @@ Comments: " + row.comments + "\n";
                     var pdir = hash.substr(0,3);
                     fs.access(adir + pdir, fs.R_OK | fs.W_OK, (err) => {
                         if (err) fs.mkdirSync(adir + pdir);
-                        fs.open(adir + pdir + "/" + hash,"w", (err, fd) => {
-                            assert.equal(err, null);
-                            fs.write(fd,raw_file);
-                        });
+                        // fs.open(adir + pdir + "/" + hash,"w", (err, fd) => {
+                        //     assert.equal(err, null);
+                        //     fs.writeFile(fd, raw_file, (err) => {
+						// 		assert.equal(err, null);
+						// 	});
+                        // });
+						upfile.mv(adir + pdir + "/" + hash, (err) => {
+							assert.equal(err, null);
+						});
                     });
                     res.send('SUCCESS');
                     res.end();
                 }
             )
         },
+
+		attachment_get: (db, req, res) => {
+			var id = req.query.id;
+			var idx = req.query.idx;
+			db.collection('projects')
+            .findOne(
+                { '_id': new ObjectId(id) },
+                (err, proj) => {
+                    assert.equal(null, err);
+					//console.log(proj);
+					var file = proj.attachments[idx];
+					var pdir = file.file_hash.substr(0,3);
+					res.download(adir + pdir + "/" + file.file_hash, file.file_name, (err, data) => {
+						assert.equal(err, null);
+						res.end();
+					});
+				}
+			);
+		},
 
         attachment_delete: (db, req, res) => {
             //console.log(req.body); res.end('SUCCESS'); return;

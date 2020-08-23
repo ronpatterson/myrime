@@ -110,25 +110,25 @@
     "title": "mytime/projects",
     "description": "collection of projects",
     "type": "object",
-    "required": [ "client_cd", "client_name", "client", "contacts", "active" ],
+    "required": [ "client_id", "client_name", "client", "contacts", "active", "entry_dtm" ],
     "properties": {
         "proj_cd" : { "type": "string" },
-        "client_cd" : { "type": "string" },
+        "client_id" : { "type": "object" },
         "name" : { "type": "string" },
         "po_nbr" : { "type": "string" },
         "priority" : { "type": "string" },
         "status" : { "type": "string" },
+        "description" : { "type": "string" },
         "hourly_rate" : { "type": "number" },
         "mileage_rate" : { "type": "number" },
         "distance" : { "type": "number" },
+        "entry_dtm" : { "type": "string", "format": "date-time" },
         "dates" : {
             "type": "object",
-            "required": [ "entered" ],
             "properties": {
-                "entered" : { "type": "string", "format": "date-time" },
-                "due" : { "type": "string", "format": "date-time" },
-                "started" : { "type": "string", "format": "date-time" },
-                "completed" : { "type": "string", "format": "date-time" }
+                "due" : { "type": "string", "format": "date" },
+                "started" : { "type": "string", "format": "date" },
+                "completed" : { "type": "string", "format": "date" }
             }
         },
         "links" : {

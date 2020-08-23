@@ -8,6 +8,7 @@
 const express = require('express'),
 	app = express(),
 	session = require('express-session'),
+	fileUpload = require('express-fileupload'),
 	MongoClient = require('mongodb').MongoClient,
 	engines = require('consolidate'),
 	bodyParser = require('body-parser'),
@@ -31,6 +32,7 @@ app.set('view engine', 'html');
 app.set('views', __dirname + '/views');
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(fileUpload());
 console.log('Current directory: ',process.cwd());
 
 function app_lu_init (db) {
@@ -172,7 +174,14 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 
 	//app.post('/attachment_add', upload.single('upfile'), function(req, res, next) {
 	app.post('/attachment_add', (req, res, next) => {
+		if (!req.files || Object.keys(req.files).length === 0) {
+	      return res.status(400).send('No files were uploaded.');
+	    }
 		wdb.attachment_add(db, req, res, next);
+	});
+
+	app.get('/get_attachment', (req, res, next) => {
+		wdb.attachment_get(db, req, res, next);
 	});
 
 	app.post('/attachment_delete', function(req, res) {
