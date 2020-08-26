@@ -64,9 +64,11 @@ module.exports = function() {
 			// if (crit0 && crit0.length > 1)
 			//   crit = {'$and':crit0};
 			// join to get client name
-			var cursor = db.collection('projects').aggregate([
+			var cursor = db.collection('projects')
+			.aggregate([
 				{ '$match': crit },
 				{ '$sort': {'proj_cd':1} },
+				// join to clients
 				{ '$lookup':
 					{
 						from: 'clients',
@@ -95,8 +97,10 @@ module.exports = function() {
 
         get_proj: (db, req, res) => {
             var id = req.query.id;
-			db.collection('projects').aggregate([
+			db.collection('projects')
+			.aggregate([
 				{ '$match': { '_id': new ObjectId(id) } },
+				// join to clients
 			    { '$lookup':
 					{
 						from: 'clients',
@@ -430,9 +434,11 @@ module.exports = function() {
 			var results = [];
 			var crit = {};
 			// link to client contact
-			db.collection('clients').aggregate([
+			db.collection('clients')
+			.aggregate([
 				{ '$match': crit },
 				{ '$sort': {'name':1} },
+				// join to contacts
 			    { '$lookup':
 					{
 						from: 'contacts',
@@ -460,8 +466,10 @@ module.exports = function() {
 		get_client: (db, req, res) => {
             var id = req.query.id;
 			// join to contacts twice
-			db.collection('clients').aggregate([
+			db.collection('clients')
+			.aggregate([
 				{ '$match': { '_id': new ObjectId(id) } },
+				// join to contacts for client name
 			    { '$lookup':
 					{
 						from: 'contacts',
@@ -472,6 +480,7 @@ module.exports = function() {
 				},
 				{ '$addFields': { contact_name: '$contact_info.cname' } },
 				{ '$unwind': '$contact_info' },
+				// join to contacts for other contacts
 				{ '$lookup':
 					{
 						from: 'contacts',
@@ -826,6 +835,48 @@ Comments: " + row.comments + "\n";
                     // delete file from fs
                     var pdir = hash.substr(0,3);
                     fs.unlink(adir + pdir + hash);
+                    res.send('SUCCESS');
+                    res.end();
+                }
+            )
+        },
+
+		link_add: (db, req, res, next) => {
+            //console.log('link_add:',req.body); res.end('SUCCESS'); return;
+            var id = req.body.link_proj_id;
+			var link = req.body.lk_link;
+            var doc = {
+  "url": link
+, "entry_dtm": new Date()
+};
+			//console.log('link:',id,doc); res.end('SUCCESS'); return;
+            var rec = db.collection('projects')
+            .updateOne(
+                { '_id': new ObjectId(id) },
+                { '$push': { 'links': doc } },
+                (err, result) => {
+                    assert.equal(err, null);
+                    console.log("Inserted a link into the projects collection.");
+                    console.log(result);
+                    res.send('SUCCESS');
+                    res.end();
+				}
+			);
+        },
+
+		link_delete: (db, req, res) => {
+            console.log('link_delete:',req.body); res.end('SUCCESS'); return;
+            var id = req.body.link_proj_id;
+            var link = req.body.lk_link;
+            // remove from bugs.attachments
+            db.collection('projects')
+            .updateOne(
+                { '_id': new ObjectId(id) },
+                { '$pull': { 'links.url': link } },
+                (err, result) => {
+                    assert.equal(err, null);
+                    console.log("Removed link from the projects collection.");
+                    //console.log(result);
                     res.send('SUCCESS');
                     res.end();
                 }

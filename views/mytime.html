@@ -308,6 +308,7 @@
 						<span onclick="return wdb.delete_project(event);">Delete Project</span>
 						<span onclick="return wdb.show_email(event);">Email Project</span>
 						<span onclick="return wdb.add_proj_notes(event);">Add Notes</span>
+						<span onclick="return wdb.add_proj_worklog(event);">Add Worklog</span>
 					</div>
 					<br>
 					<fieldset>
@@ -367,6 +368,23 @@
 					<div id="mt_projedit_errors"></div>
 				</div>
 			</div> <!-- end of project_show_edit -->
+
+			<div id="links_div" class="projform content_divs">
+				<form id="links_form" name="links_form" method="post"><br>
+				<input type="hidden" name="link_proj_id">
+				<fieldset>
+					<legend>WDD MyTime Links</legend>
+					<label>ID:</label>
+					<div class="fields2"><span id="lk_proj_cd"></span></div><br class="clear">
+					<label for="lk_link"><span class="required">*</span>URL Link:</label>
+					<div class="fields2"><input type="text" name="lk_link" size="30"></div><br class="clear">
+					<div class="fields2"><input type="submit" value="SAVE"> <input type="button" id="links_cancel" value="Cancel"></div><br class="clear">
+				</fieldset>
+				</form>
+				<br>
+				<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
+				<div id="lk_errors"></div>
+			</div>
 
 			<div id="worklog_form" class="projform content_divs">
 				<form id="form2" name="form2" method="post"><br>

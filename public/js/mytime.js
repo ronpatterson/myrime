@@ -349,6 +349,8 @@ var wdb = // setup the wdb namespace
 			$('#sudt_v').html(data.sdt);
 			$('#pcdt_v').html(data.cdt);
 			wdb.get_files(event);
+			wdb.get_links(event);
+			wdb.notes_show(event);
 			wdb.worklog_show(event,data);
 			//wdb.mt_save_cancel();
 			wdb.hideview_content($('#projects_list'),$('#project_show_edit'));
@@ -936,6 +938,50 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	add_link: function ( event ) {
+		wdb.showDialogDiv('MyTime Links','links_div');
+		$('#lk_proj_cd').html($('#proj_cd2_v').html());
+		$('#links_form input[name="link_proj_id"]').val($('#pid').val());
+		$('#links_form input[name="lk_link"]').val('');
+		$('#lk_errors').html('');
+		$('#links_div').show();
+		return true;
+	},
+
+	linkhandler: function( event ) {
+		//alert('linkhandler '+$('#links_form').serialize()); return false;
+		//var err = wdb.validate();
+		var err = '';
+		if ($('#links_form input[name="lk_link"]').val().blank())
+			err += ' - URL Link must not be blank<br>';
+		if (err != '')
+		{
+			$('#lk_errors').html('Errors encountered:<br>'+err);
+			return false;
+		}
+		var id = $('#pid').val();
+		var params = 'action=link_add&'+$('#links_form').serialize();
+		params += '&id='+id;
+		//alert('workloghandler '+params);
+		$.ajax({
+			url: 'link_add',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#links_div').dialog('close');
+				wdb.projshow(event,$('#pid').val());
+				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
+			}
+			else
+				$('#lk_errors').html(response);
+		});
+		return false;
+	},
+
 	add_worklog: function ( event ) {
 		wdb.showDialogDiv('MyTime Worklog','mt_worklog_form');
 		$('#mt_wl_mt_id').html($('#mt_id2_v').text());
@@ -1009,6 +1055,57 @@ var wdb = // setup the wdb namespace
             });
         }
         $('#filesDiv').html(out);
+	},
+
+	get_links: function ( event )
+	{
+		$('#linksDiv').empty();
+        var out = '';
+        var data = typeof(wdb.proj_doc.links) == 'object' ? wdb.proj_doc.links : [];
+        if (data.length == 0)
+            out = 'No links';
+        else
+        {
+            $.each(data,function (i)
+            {
+                var id = $('#pid').val();
+                out += '<a href="' + data[i].url + '" target="_blank">'+data[i].url+'</a> <span onclick="return wdb.remove_link(\''+id+'\','+i+');" style="cursor: pointer;">Remove</span><br>';
+            });
+        }
+        $('#linksDiv').html(out);
+	},
+
+	notes_show: function ( event )
+	{
+		$('#notes_div').empty();
+        var out = '';
+        var data = typeof(wdb.proj_doc.notes) == 'object' ? wdb.proj_doc.notes : [];
+        if (data.length == 0)
+			$('#notes_div').html('No notes');
+        else
+        {
+			$.each(data, (i) => {
+				data[i].edtm = data[i].entry_dtm.substr(0,10);
+			});
+			out = '<table id="mt_notes_tbl" class="display" border="1" cellspacing="0" cellpadding="2"><thead><tr><th>Date</th><th>User</th><th>Notes</th><th></th></tr></thead></table>';
+			$('#notes_div').html(out);
+			var table = $('#mt_notes_tbl').DataTable({
+	            'data': data,
+	            'destroy': true,
+	            'order': [[ 0, "asc" ]],
+	            'columns': [
+	                {'data': 'edtm'},
+	                {'data': 'user_nm'},
+	                {'data': 'comments'},
+	                null
+	            ],
+	            'columnDefs': [ {
+	                'targets': -1,
+	                'data': null,
+	                'defaultContent': '<button>Edit</button>'
+	            } ]
+	        });
+        }
 	},
 
 	attach_file: function ( event )
@@ -1773,6 +1870,7 @@ var wdb = // setup the wdb namespace
 		$('#client_edit_cancel').on('click',wdb.mt_clientedit_cancel);
 		$('#mt_contacts_done_btn').on('click',wdb.toggle_contacts_done);
 		$('#mt_form9').on('submit',wdb.handle_search);
+		$('#links_form').on('submit',wdb.linkhandler);
 		$('#mt_email_form').on('submit',wdb.email_mt);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
 		$('#mt_lu_form_id').on('submit',wdb.luhandler);
