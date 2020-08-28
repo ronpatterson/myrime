@@ -305,15 +305,17 @@
 					<br>
 					<div align="center" id="proj_show_buttons">
 						<span onclick="return wdb.edit_project(event);">Edit Project</span>
+						<!--
 						<span onclick="return wdb.delete_project(event);">Delete Project</span>
+						-->
 						<span onclick="return wdb.show_email(event);">Email Project</span>
-						<span onclick="return wdb.add_proj_notes(event);">Add Notes</span>
+						<span onclick="return wdb.add_proj_note(event);">Add Note</span>
 						<span onclick="return wdb.add_proj_worklog(event);">Add Worklog</span>
 					</div>
 					<br>
 					<fieldset>
 						<legend>Project Notes</legend>
-						<div id="notes_div"></div>
+						<div id="notesDiv"></div>
 					</fieldset>
 					<br>
 					<fieldset>
@@ -384,6 +386,26 @@
 				<br>
 				<div class="required" style="font-size: 9pt;" align="center">* Required fields</div>
 				<div id="lk_errors"></div>
+			</div>
+
+			<div id="notes_div" class="projform content_divs">
+				<form id="notes_form" name="notes_form" method="post"><br>
+				<input type="hidden" name="user_nm">
+				<input type="hidden" name="note_proj_id">
+				<input type="hidden" name="note_idx">
+				<input type="hidden" name="note_old">
+				<fieldset>
+					<legend>WDD MyTime Project Notes</legend>
+					<label>ID:</label>
+					<div class="fields2"><span id="note_proj_cd"></span></div><br class="clear">
+					<label for="comments"><span class="required">*</span>Note:</label>
+					<div class="fields2"><textarea name="comments" cols="30" rows="5"></textarea></div><br class="clear">
+					<div class="fields2"><input type="submit" value="SAVE"> <input type="button" id="notes_cancel" value="Cancel"></div><br class="clear">
+				</fieldset>
+				</form>
+				<br>
+				<div class="required" style="font-size: 9pt;" align="center">* Required fields (Max. 512 characters)</div>
+				<div id="notes_errors"></div>
 			</div>
 
 			<div id="worklog_form" class="projform content_divs">

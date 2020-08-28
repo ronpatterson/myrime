@@ -196,6 +196,14 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 		wdb.link_delete(db, req, res);
 	});
 
+	app.post('/note_add_update', (req, res, next) => {
+		wdb.note_add_update(db, req, res, next);
+	});
+
+	app.post('/note_delete', function(req, res) {
+		wdb.note_delete(db, req, res);
+	});
+
 	app.get('/admin_lu_list', function(req, res) {
 		wdb.admin_lu_list(db, req, res);
 	});

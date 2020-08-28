@@ -982,6 +982,68 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	add_proj_note: function ( event ) {
+		wdb.showDialogDiv('MyTime Notes','notes_div');
+		$('#note_proj_cd').html($('#proj_cd2_v').html());
+		$('#notes_form input[name="user_nm"]').val('rlpatter');
+		$('#notes_form input[name="note_idx"]').val('');
+		$('#notes_form input[name="note_proj_id"]').val($('#pid').val());
+		$('#notes_form input[name="note_old"]').val('');
+		$('#notes_form textarea[name="comments"]').val('');
+		$('#notes_errors').html('');
+		$('#notes_div').show();
+		return true;
+	},
+
+	edit_proj_note: function ( event, idx ) {
+		wdb.showDialogDiv('MyTime Notes','notes_div');
+		var unm = wdb.proj_doc.notes[idx].user_nm;
+		var note = wdb.proj_doc.notes[idx].comments;
+		$('#note_proj_cd').html($('#proj_cd2_v').html());
+		$('#notes_form input[name="user_nm"]').val('');
+		$('#notes_form input[name="note_idx"]').val(idx);
+		$('#notes_form input[name="note_proj_id"]').val($('#pid').val());
+		$('#notes_form input[name="note_old"]').val(note);
+		$('#notes_form textarea[name="comments"]').val(note);
+		$('#notes_errors').html('');
+		$('#notes_div').show();
+		return true;
+	},
+
+	notehandler: function( event ) {
+		//alert('notehandler '+$('#notes_form').serialize()); return false;
+		//var err = wdb.validate();
+		var err = '';
+		if ($('#notes_form textarea[name="comments"]').val().blank())
+			err += ' - Note must not be blank<br>';
+		if (err != '')
+		{
+			$('#notes_errors').html('Errors encountered:<br>'+err);
+			return false;
+		}
+		var id = $('#pid').val();
+		var params = 'action=note_add_update&'+$('#notes_form').serialize();
+		params += '&id='+id;
+		//alert('workloghandler '+params);
+		$.ajax({
+			url: 'note_add_update',
+			type: 'post',
+			data: params,
+			dataType: 'html'
+		}).done(function (response)
+		{
+			if (/^SUCCESS/.test(response))
+			{
+				$('#notes_div').dialog('close');
+				wdb.projshow(event,$('#pid').val());
+				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
+			}
+			else
+				$('#notes_errors').html(response);
+		});
+		return false;
+	},
+
 	add_worklog: function ( event ) {
 		wdb.showDialogDiv('MyTime Worklog','mt_worklog_form');
 		$('#mt_wl_mt_id').html($('#mt_id2_v').text());
@@ -1077,22 +1139,23 @@ var wdb = // setup the wdb namespace
 
 	notes_show: function ( event )
 	{
-		$('#notes_div').empty();
+		$('#notesDiv').empty();
         var out = '';
         var data = typeof(wdb.proj_doc.notes) == 'object' ? wdb.proj_doc.notes : [];
         if (data.length == 0)
-			$('#notes_div').html('No notes');
+			$('#notesDiv').html('No notes');
         else
         {
 			$.each(data, (i) => {
 				data[i].edtm = data[i].entry_dtm.substr(0,10);
+				data[i].idx = i;
 			});
 			out = '<table id="mt_notes_tbl" class="display" border="1" cellspacing="0" cellpadding="2"><thead><tr><th>Date</th><th>User</th><th>Notes</th><th></th></tr></thead></table>';
-			$('#notes_div').html(out);
+			$('#notesDiv').html(out);
 			var table = $('#mt_notes_tbl').DataTable({
 	            'data': data,
 	            'destroy': true,
-	            'order': [[ 0, "asc" ]],
+	            'order': [[ 0, "desc" ]],
 	            'columns': [
 	                {'data': 'edtm'},
 	                {'data': 'user_nm'},
@@ -1104,6 +1167,11 @@ var wdb = // setup the wdb namespace
 	                'data': null,
 	                'defaultContent': '<button>Edit</button>'
 	            } ]
+			});
+			$('#mt_notes_tbl tbody').on( 'click', 'button', function () {
+				var data = table.row( $(this).parents('tr') ).data();
+				//alert( 'user='+data[0]);
+				wdb.edit_proj_note(event,data.idx);
 	        });
         }
 	},
@@ -1871,6 +1939,7 @@ var wdb = // setup the wdb namespace
 		$('#mt_contacts_done_btn').on('click',wdb.toggle_contacts_done);
 		$('#mt_form9').on('submit',wdb.handle_search);
 		$('#links_form').on('submit',wdb.linkhandler);
+		$('#notes_form').on('submit',wdb.notehandler);
 		$('#mt_email_form').on('submit',wdb.email_mt);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
 		$('#mt_lu_form_id').on('submit',wdb.luhandler);

@@ -883,6 +883,51 @@ Comments: " + row.comments + "\n";
             )
         },
 
+		note_add_update: (db, req, res, next) => {
+            //console.log('note_add_update:',req.body); res.end('SUCCESS'); return;
+            var id = req.body.note_proj_id;
+			var note = req.body.comments.substr(0,512);
+			var note_old = req.body.note_old;
+			var idx = req.body.note_idx;
+			var doc = {
+  "user_nm": req.body.user_nm
+, "comments": note
+, "entry_dtm": new Date()
+};
+			if (idx === "")
+			{ // add note
+				//console.log('add note:',id,doc); res.end('SUCCESS'); return;
+	            var rec = db.collection('projects')
+	            .updateOne(
+	                { '_id': new ObjectId(id) },
+	                { '$push': { 'notes': doc } },
+	                (err, result) => {
+	                    assert.equal(err, null);
+	                    console.log("Inserted a note into the projects collection.");
+	                    //console.log(result);
+	                    res.send('SUCCESS');
+	                    res.end();
+					}
+				);
+			}
+			else { // update note
+				//console.log('link:',id,doc); res.end('SUCCESS'); return;
+	            var rec = db.collection('projects')
+	            .updateOne(
+	                { '_id': new ObjectId(id) },
+					{ "$set": { "notes.$[element].comments": note } },
+    				{ "arrayFilters": [ { "element.comments": { "$eq": note_old } } ] },
+	                (err, result) => {
+	                    assert.equal(err, null);
+	                    console.log("Updated a note into the projects collection.");
+	                    //console.log(result);
+	                    res.send('SUCCESS');
+	                    res.end();
+					}
+				);
+			}
+        },
+
         admin_lu_list: (db, req, res) => {
             var type = req.query.type;
             db.collection('lookups')
