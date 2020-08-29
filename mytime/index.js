@@ -6,17 +6,17 @@
 
 // load required modules
 const ObjectId = require('mongodb').ObjectID,
-	fs = require('fs'),
-	dateFormat = require('dateformat'),
-	crypto = require('crypto'),
-	mailer = require("nodemailer"),
-	assert = require('assert');
+    fs = require('fs'),
+    dateFormat = require('dateformat'),
+    crypto = require('crypto'),
+    mailer = require("nodemailer"),
+    assert = require('assert');
 
 const adir = '/usr/local/data/',
-	smtp_host = 'smtp.postoffice.net',
-	smtp_user = 'ron.patterson%40usa.net',
-	smtp_pw = 'xxxx',
-	dateFmt1 = 'mm/dd/yyyy h:MM tt',
+    smtp_host = 'smtp.postoffice.net',
+    smtp_user = 'ron.patterson%40usa.net',
+    smtp_pw = 'xxxx',
+    dateFmt1 = 'mm/dd/yyyy h:MM tt',
     dateFmt2 = 'mm/dd/yyyy';
 
 var lookups = [];
@@ -40,7 +40,7 @@ module.exports = function() {
         },
 
         put_lookups: (lu) => {
-			//console.log(lu);
+            //console.log(lu);
             lookups = lu;
         },
 
@@ -58,60 +58,60 @@ module.exports = function() {
         },
 
         proj_list: (db, req, res) => {
-			var results = [];
-			var crit = {};
-			// var crit0 = req.query.crit;
-			// if (crit0 && crit0.length > 1)
-			//   crit = {'$and':crit0};
-			// join to get client name
-			var cursor = db.collection('projects')
-			.aggregate([
-				{ '$match': crit },
-				{ '$sort': {'proj_cd':1} },
-				// join to clients
-				{ '$lookup':
-					{
-						from: 'clients',
-						localField: 'client_id',
-						foreignField: '_id',
-						as: 'client_info'
-					}
-				}
-			]);
-			//console.log(cursor);
-			cursor.forEach((doc) => {
-				//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
-				//console.log(doc);
-				doc.entry_dtm = dateFormat(doc.entry_dtm,dateFmt2);
-				doc.status = getWDDlookup("mt_status",doc.status);
-				doc.client = doc.client_info[0].client_name;
-				results.push(doc);
-			}, (err) => {
-				assert.equal(null, err);
-				results = {'data':results};
-				//console.log(results.data);
-				res.json(results);
-				res.end();
-			});
+            var results = [];
+            var crit = {};
+            // var crit0 = req.query.crit;
+            // if (crit0 && crit0.length > 1)
+            //   crit = {'$and':crit0};
+            // join to get client name
+            var cursor = db.collection('projects')
+            .aggregate([
+                { '$match': crit },
+                { '$sort': {'proj_cd':1} },
+                // join to clients
+                { '$lookup':
+                    {
+                        from: 'clients',
+                        localField: 'client_id',
+                        foreignField: '_id',
+                        as: 'client_info'
+                    }
+                }
+            ]);
+            //console.log(cursor);
+            cursor.forEach((doc) => {
+                //doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
+                //console.log(doc);
+                doc.entry_dtm = dateFormat(doc.entry_dtm,dateFmt2);
+                doc.status = getWDDlookup("mt_status",doc.status);
+                doc.client = doc.client_info[0].client_name;
+                results.push(doc);
+            }, (err) => {
+                assert.equal(null, err);
+                results = {'data':results};
+                //console.log(results.data);
+                res.json(results);
+                res.end();
+            });
         },
 
         get_proj: (db, req, res) => {
             var id = req.query.id;
-			db.collection('projects')
-			.aggregate([
-				{ '$match': { '_id': new ObjectId(id) } },
-				// join to clients
-			    { '$lookup':
-					{
-						from: 'clients',
-						localField: 'client_id',
-						foreignField: '_id',
-						as: 'client_info'
-					}
-				},
-				{ '$addFields': { client_name: '$client_info.client_name' } }
-			]).toArray( (err, results) => {
-				var proj = results[0];
+            db.collection('projects')
+            .aggregate([
+                { '$match': { '_id': new ObjectId(id) } },
+                // join to clients
+                { '$lookup':
+                    {
+                        from: 'clients',
+                        localField: 'client_id',
+                        foreignField: '_id',
+                        as: 'client_info'
+                    }
+                },
+                { '$addFields': { client_name: '$client_info.client_name' } }
+            ]).toArray( (err, results) => {
+                var proj = results[0];
                 assert.equal(null, err);
                 proj.status_descr = getWDDlookup("mt_status",proj.status);
                 proj.priority_descr = getWDDlookup("mt_priority",proj.priority);
@@ -133,7 +133,7 @@ module.exports = function() {
 
         add_update_proj: (db, req, res, next) => {
             //console.log(req.body); res.end('TEST'); return;
-			var doc = {
+            var doc = {
   "proj_cd": ''
 , "name": req.body.name
 , "user_id": req.body.user_id
@@ -147,28 +147,28 @@ module.exports = function() {
 , "dates": {}
 };
             if (typeof(req.body['id']) == 'undefined' || req.body.id == '') { // add
-				console.log(req);
-				// assign a project code
+                console.log(req);
+                // assign a project code
                 db.collection('counters').findOneAndUpdate (
                     { "_id": 'proj_cd' },
                     { '$inc': { 'seq': 1 } },
                     {
-						"returnNewDocument": true,
-						"upsert": true
+                        "returnNewDocument": true,
+                        "upsert": true
                     },
                     (err, updoc) => {
                         assert.equal(null, err);
                         console.log(updoc);
                         var id = updoc.value.seq.valueOf();
-						var client_cd = req.body.client.split(',');
-						doc.client_id = new ObjectId(client_cd[0]);
+                        var client_cd = req.body.client.split(',');
+                        doc.client_id = new ObjectId(client_cd[0]);
                         doc.proj_cd = client_cd[1] + id;
-						doc.entry_dtm = new Date();
-						doc.dates = {
-							"due": req.body.due != "" ? new Date(req.body.due) : null,
-							"started": req.body.started != "" ? new Date(req.body.started) : null,
-							"completed": req.body.completed != "" ? new Date(req.body.completed) : null
-						}
+                        doc.entry_dtm = new Date();
+                        doc.dates = {
+                            "due": req.body.due != "" ? new Date(req.body.due) : null,
+                            "started": req.body.started != "" ? new Date(req.body.started) : null,
+                            "completed": req.body.completed != "" ? new Date(req.body.completed) : null
+                        }
                         //console.log(doc); res.end('TEST'); return;
                         db.collection('projects')
                         .insertOne(
@@ -187,12 +187,12 @@ module.exports = function() {
             else { // update
                 var pid = req.body.proj_cd.replace(/.*(\d+)$/,'$1');
                 var proj_cd = req.body.proj_cd;
-				delete doc.proj_cd;
-				doc.dates = {
-					"due": req.body.due != "" ? new Date(req.body.due) : null,
-					"started": req.body.started != "" ? new Date(req.body.started) : null,
-					"completed": req.body.completed != "" ? new Date(req.body.completed) : null
-				}
+                delete doc.proj_cd;
+                doc.dates = {
+                    "due": req.body.due != "" ? new Date(req.body.due) : null,
+                    "started": req.body.started != "" ? new Date(req.body.started) : null,
+                    "completed": req.body.completed != "" ? new Date(req.body.completed) : null
+                }
                 //console.log(doc); res.end('TEST'); return;
                 var id = req.body.id;
                 db.collection('projects')
@@ -210,115 +210,115 @@ module.exports = function() {
             }
         },
 
-		delete_contact: (db, req, res) => {
-			console.log('delete_contact:',req.body); res.end('SUCCESS'); return false;
-			var id = req.body.id;
-			var cname = req.body.cname;
-			// check for link to clients
-			db.collection('clients')
-			.findOne(
-				{ '$or': [ { 'client': id }, { 'contacts': { '$all': [ id ] } } ] },
-				(err, client) => {
-					if (client)
-					{
-						assert.equal(null, err);
-						console.log(cname + " linked in the clients collection.");
-						//console.log(result);
-						res.send('FAIL ' + cname + ' found in clients!');
-						res.end();
-						return false;
-					}
-					else { // good to go
-						db.collection('contacts')
-						.removeOne(
-						{ '_id': new ObjectId(id) },
-						(err, result) => {
-							  assert.equal(err, null);
-							  console.log("Removed document from the contacts collection.");
-							  //console.log(result);
-							  res.send('SUCCESS');
-							  res.end();
-							}
-						);
-					}
-				}
-			);
-		},
+        delete_contact: (db, req, res) => {
+            console.log('delete_contact:',req.body); res.end('SUCCESS'); return false;
+            var id = req.body.id;
+            var cname = req.body.cname;
+            // check for link to clients
+            db.collection('clients')
+            .findOne(
+                { '$or': [ { 'client': id }, { 'contacts': { '$all': [ id ] } } ] },
+                (err, client) => {
+                    if (client)
+                    {
+                        assert.equal(null, err);
+                        console.log(cname + " linked in the clients collection.");
+                        //console.log(result);
+                        res.send('FAIL ' + cname + ' found in clients!');
+                        res.end();
+                        return false;
+                    }
+                    else { // good to go
+                        db.collection('contacts')
+                        .removeOne(
+                        { '_id': new ObjectId(id) },
+                        (err, result) => {
+                              assert.equal(err, null);
+                              console.log("Removed document from the contacts collection.");
+                              //console.log(result);
+                              res.send('SUCCESS');
+                              res.end();
+                            }
+                        );
+                    }
+                }
+            );
+        },
 
-		delete_client: (db, req, res) => {
-			console.log('delete_client:',req.body); res.end('SUCCESS'); return false;
-			var id = req.body.id;
-			var cname = req.body.client_name;
-			// check for link to clients
-			db.collection('projects')
-			.findOne(
-				{ 'client': id },
-				(err, project) => {
-					if (project)
-					{
-						assert.equal(null, err);
-						console.log(cname + " linked in the projects collection.");
-						//console.log(result);
-						res.send('FAIL ' + cname + ' found in projects!');
-						res.end();
-						return false;
-					}
-					else { // good to go
-						db.collection('clients')
-						.removeOne(
-						{ '_id': new ObjectId(id) },
-						(err, result) => {
-							  assert.equal(err, null);
-							  console.log("Removed document from the clients collection.");
-							  //console.log(result);
-							  res.send('SUCCESS');
-							  res.end();
-							}
-						);
-					}
-				}
-			);
-		},
+        delete_client: (db, req, res) => {
+            console.log('delete_client:',req.body); res.end('SUCCESS'); return false;
+            var id = req.body.id;
+            var cname = req.body.client_name;
+            // check for link to clients
+            db.collection('projects')
+            .findOne(
+                { 'client': id },
+                (err, project) => {
+                    if (project)
+                    {
+                        assert.equal(null, err);
+                        console.log(cname + " linked in the projects collection.");
+                        //console.log(result);
+                        res.send('FAIL ' + cname + ' found in projects!');
+                        res.end();
+                        return false;
+                    }
+                    else { // good to go
+                        db.collection('clients')
+                        .removeOne(
+                        { '_id': new ObjectId(id) },
+                        (err, result) => {
+                              assert.equal(err, null);
+                              console.log("Removed document from the clients collection.");
+                              //console.log(result);
+                              res.send('SUCCESS');
+                              res.end();
+                            }
+                        );
+                    }
+                }
+            );
+        },
 
         delete_proj: (db, req, res) => {
-			console.log(req.body); res.end('SUCCESS'); return;
-			var id = req.body.id;
-			db.collection('projects')
-			.removeOne(
-				{ '_id': new ObjectId(id) },
-				(err, result) => {
-					assert.equal(err, null);
-					console.log("Removed document from the projects collection.");
-					//console.log(result);
-					res.send('SUCCESS');
-					res.end();
-				}
-			);
-		},
+            console.log(req.body); res.end('SUCCESS'); return;
+            var id = req.body.id;
+            db.collection('projects')
+            .removeOne(
+                { '_id': new ObjectId(id) },
+                (err, result) => {
+                    assert.equal(err, null);
+                    console.log("Removed document from the projects collection.");
+                    //console.log(result);
+                    res.send('SUCCESS');
+                    res.end();
+                }
+            );
+        },
 
-		contacts_list: (db, req, res) => {
-			//console.log('contacts_list',req);
-			var results = [];
-			var crit = {};
-			var cursor = db.collection('contacts').find(crit);
-			cursor.sort({'lname':1, 'fname':1});
-			cursor.forEach((doc) => {
-				//console.log(doc);
-				//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
-				doc.name = doc.lname + ', ' + doc.fname;
-				doc.active = doc.active == 'y' ? 'Yes' : 'No';
-				//doc.status = getWDDlookup("status",doc.status);
-				results.push(doc);
-			}, (err) => {
-				assert.equal(null, err);
-				results = {'data':results};
-				//console.log(results);
-				res.json(results);
-				res.end();
-			});
-		},
+        contacts_list: (db, req, res) => {
+            //console.log('contacts_list',req);
+            var results = [];
+            var crit = {};
+            var cursor = db.collection('contacts').find(crit);
+            cursor.sort({'lname':1, 'fname':1});
+            cursor.forEach((doc) => {
+                //console.log(doc);
+                //doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
+                doc.name = doc.lname + ', ' + doc.fname;
+                doc.active = doc.active == 'y' ? 'Yes' : 'No';
+                //doc.status = getWDDlookup("status",doc.status);
+                results.push(doc);
+            }, (err) => {
+                assert.equal(null, err);
+                results = {'data':results};
+                //console.log(results);
+                res.json(results);
+                res.end();
+            });
+        },
 
-		get_contact: (db, req, res) => {
+        get_contact: (db, req, res) => {
             var id = req.query.id;
             db.collection('contacts')
             .findOne(
@@ -334,202 +334,202 @@ module.exports = function() {
             );
         },
 
-		contact_add_update: (db, req, res, next) => {
+        contact_add_update: (db, req, res, next) => {
             // cname, lname, fname, email, addr_number, addr_street, addr_city, addr_state, addr_zip, addr_country, active
             //console.log('add/edit',req.body); res.end('TEST'); return;
-			// setup the db document
-			var cname = req.body.lname + ', ' + req.body.fname;
-			var doc = {
+            // setup the db document
+            var cname = req.body.lname + ', ' + req.body.fname;
+            var doc = {
   "cname": cname
 , "lname": req.body.lname
 , "fname": req.body.fname
 , "email": req.body.email
 , "address": {
-	  "number": req.body.addr_number
-	, "street": req.body.addr_street
-	, "city": req.body.addr_city
-	, "state": req.body.addr_state
-	, "zip": req.body.addr_zip
-	, "country": req.body.addr_country
+      "number": req.body.addr_number
+    , "street": req.body.addr_street
+    , "city": req.body.addr_city
+    , "state": req.body.addr_state
+    , "zip": req.body.addr_zip
+    , "country": req.body.addr_country
 }
 , "phone": {
-	  "work": req.body.work
-	, "cell": req.body.cell
-	, "fax": req.body.fax
+      "work": req.body.work
+    , "cell": req.body.cell
+    , "fax": req.body.fax
 }
 , "active": req.body.active
 };
-			// check action
+            // check action
             if (req.body.id == '') { // add
-				// check for duplicate
-				db.collection('contacts')
-	            .findOne(
-	                { 'cname': cname },
-	                (err, contact) => {
-						if (contact && contact._id != id)
-						{
-		                    assert.equal(null, err);
-		                    console.log(cname + " already in the contacts collection.");
-		                    //console.log(result);
-		                    res.send('FAIL ' + cname + ' already exist!');
-		                    res.end();
-							return false;
-	                	}
-						else {
-							doc.entry_dtm = new Date();
-			                var rec = db.collection('contacts')
-			                .insertOne(
-			                    doc,
-			                    (err, result) => {
-			                        assert.equal(err, null);
-			                        console.log("Inserted a document into the contacts collection.");
-			                        //console.log(result);
-			                        res.send('SUCCESS');
-			                        res.end();
-			                    }
-			                );
-						}
-					}
-            	);
+                // check for duplicate
+                db.collection('contacts')
+                .findOne(
+                    { 'cname': cname },
+                    (err, contact) => {
+                        if (contact && contact._id != id)
+                        {
+                            assert.equal(null, err);
+                            console.log(cname + " already in the contacts collection.");
+                            //console.log(result);
+                            res.send('FAIL ' + cname + ' already exist!');
+                            res.end();
+                            return false;
+                        }
+                        else {
+                            doc.entry_dtm = new Date();
+                            var rec = db.collection('contacts')
+                            .insertOne(
+                                doc,
+                                (err, result) => {
+                                    assert.equal(err, null);
+                                    console.log("Inserted a document into the contacts collection.");
+                                    //console.log(result);
+                                    res.send('SUCCESS');
+                                    res.end();
+                                }
+                            );
+                        }
+                    }
+                );
             }
             else { // update
-				var id = req.body.id;
-				// check for duplicate
-				db.collection('contacts')
-				.findOne(
-					{ 'cname': cname },
-					(err, contact) => {
-						assert.equal(null, err);
-						//console.log('read',contact);
-						if (contact && contact._id != id)
-						{
-							console.log(cname + " already in the contacts collection (2).");
-							//console.log(result);
-							res.send('FAIL ' + cname + ' already exist!');
-							res.end();
-							return false;
-						}
-						else { // good to go
-							doc.update_dtm = new Date();
-			                var rec = db.collection('contacts')
-			                .updateOne(
-			                    { '_id': new ObjectId(id) },
-			                    { '$set': doc },
-			                    (err, result) => {
-			                        assert.equal(err, null);
-									console.log("Updated a document into the contacts collection.");
-			                        //console.log(result);
-			                        res.send('SUCCESS');
-			                        res.end();
-			                    }
-			                );
-						}
-					}
-				);
+                var id = req.body.id;
+                // check for duplicate
+                db.collection('contacts')
+                .findOne(
+                    { 'cname': cname },
+                    (err, contact) => {
+                        assert.equal(null, err);
+                        //console.log('read',contact);
+                        if (contact && contact._id != id)
+                        {
+                            console.log(cname + " already in the contacts collection (2).");
+                            //console.log(result);
+                            res.send('FAIL ' + cname + ' already exist!');
+                            res.end();
+                            return false;
+                        }
+                        else { // good to go
+                            doc.update_dtm = new Date();
+                            var rec = db.collection('contacts')
+                            .updateOne(
+                                { '_id': new ObjectId(id) },
+                                { '$set': doc },
+                                (err, result) => {
+                                    assert.equal(err, null);
+                                    console.log("Updated a document into the contacts collection.");
+                                    //console.log(result);
+                                    res.send('SUCCESS');
+                                    res.end();
+                                }
+                            );
+                        }
+                    }
+                );
             }
         },
 
-		clients_list: (db, req, res) => {
-			//console.log('clients_list',req);
-			var results = [];
-			var crit = {};
-			// link to client contact
-			db.collection('clients')
-			.aggregate([
-				{ '$match': crit },
-				{ '$sort': {'name':1} },
-				// join to contacts
-			    { '$lookup':
-					{
-						from: 'contacts',
-						localField: 'client',
-						foreignField: '_id',
-						as: 'contact_info'
-					}
-		       }
-		   ]).toArray( (err, res2) => {
-				res2.forEach( (doc) => {
-					//console.log('client:',doc);
-					//doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
-					//doc.status = getWDDlookup("status",doc.status);
-					doc.cname = doc.contact_info[0].cname;
-					doc.active = doc.active == 'y' ? 'Yes' : 'No';
-					results.push(doc);
-				});
-				results = {'data':results};
-				//console.log('results:',results);
-				res.json(results);
-				res.end();
-			});
-		},
-
-		get_client: (db, req, res) => {
-            var id = req.query.id;
-			// join to contacts twice
-			db.collection('clients')
-			.aggregate([
-				{ '$match': { '_id': new ObjectId(id) } },
-				// join to contacts for client name
-			    { '$lookup':
-					{
-						from: 'contacts',
-						localField: 'client',
-						foreignField: '_id',
-						as: 'contact_info'
-					}
-				},
-				{ '$addFields': { contact_name: '$contact_info.cname' } },
-				{ '$unwind': '$contact_info' },
-				// join to contacts for other contacts
-				{ '$lookup':
-					{
-						from: 'contacts',
-						localField: 'contacts',
-						foreignField: '_id',
-						as: 'contacts_data'
-					}
-				},
-				{ '$sort': {'name':1} }
-			]).toArray( (err, results) => {
-				var res2 = results[0];
-				//console.log('results:',res2);
-				res2.edtm = dateFormat(res2.entry_dtm,dateFmt1);
-				res2.udtm = typeof(res2.update_dtm) == 'undefined' ? '' : dateFormat(res2.update_dtm,dateFmt1);
-				res.json(res2);
-				res.end();
-			});
+        clients_list: (db, req, res) => {
+            //console.log('clients_list',req);
+            var results = [];
+            var crit = {};
+            // link to client contact
+            db.collection('clients')
+            .aggregate([
+                { '$match': crit },
+                { '$sort': {'name':1} },
+                // join to contacts
+                { '$lookup':
+                    {
+                        from: 'contacts',
+                        localField: 'client',
+                        foreignField: '_id',
+                        as: 'contact_info'
+                    }
+               }
+           ]).toArray( (err, res2) => {
+                res2.forEach( (doc) => {
+                    //console.log('client:',doc);
+                    //doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
+                    //doc.status = getWDDlookup("status",doc.status);
+                    doc.cname = doc.contact_info[0].cname;
+                    doc.active = doc.active == 'y' ? 'Yes' : 'No';
+                    results.push(doc);
+                });
+                results = {'data':results};
+                //console.log('results:',results);
+                res.json(results);
+                res.end();
+            });
         },
 
-		get_client_contacts: (db, req, res, next) => {
-			var cids = req.query.contacts.split(',');
-			var ids = [];
-			cids.forEach((item, i) => {
-				ids.push(new ObjectId(item));
-			});
-			// TODO determine multiple _id query
+        get_client: (db, req, res) => {
+            var id = req.query.id;
+            // join to contacts twice
+            db.collection('clients')
+            .aggregate([
+                { '$match': { '_id': new ObjectId(id) } },
+                // join to contacts for client name
+                { '$lookup':
+                    {
+                        from: 'contacts',
+                        localField: 'client',
+                        foreignField: '_id',
+                        as: 'contact_info'
+                    }
+                },
+                { '$addFields': { contact_name: '$contact_info.cname' } },
+                { '$unwind': '$contact_info' },
+                // join to contacts for other contacts
+                { '$lookup':
+                    {
+                        from: 'contacts',
+                        localField: 'contacts',
+                        foreignField: '_id',
+                        as: 'contacts_data'
+                    }
+                },
+                { '$sort': {'name':1} }
+            ]).toArray( (err, results) => {
+                var res2 = results[0];
+                //console.log('results:',res2);
+                res2.edtm = dateFormat(res2.entry_dtm,dateFmt1);
+                res2.udtm = typeof(res2.update_dtm) == 'undefined' ? '' : dateFormat(res2.update_dtm,dateFmt1);
+                res.json(res2);
+                res.end();
+            });
+        },
+
+        get_client_contacts: (db, req, res, next) => {
+            var cids = req.query.contacts.split(',');
+            var ids = [];
+            cids.forEach((item, i) => {
+                ids.push(new ObjectId(item));
+            });
+            // TODO determine multiple _id query
             db.collection('contacts')
             .find(
                 { '_id': { '$in': ids } },
                 (err, contacts) => {
                     assert.equal(null, err);
-					var contacts2 = contacts.toArray();
+                    var contacts2 = contacts.toArray();
                     console.log(contacts2);
                     res.json(contacts2);
                     res.end();
                 }
             );
-		},
+        },
 
-		client_add_update: (db, req, res, next) => {
+        client_add_update: (db, req, res, next) => {
             // client_cd, client_name, client, contacts, hourly_rate, mileage_rate, distance, active
             //console.log('add/edit',req.body); res.end('TEST'); return;
-			var client_cd = req.body.client_cd;
-			var contacts = [];
-			req.body.contacts_ids.split(',').forEach((item, i) => {
-				contacts.push(new ObjectId(item.trim()));
-			});
-			// setup db document
-			var doc = {
+            var client_cd = req.body.client_cd;
+            var contacts = [];
+            req.body.contacts_ids.split(',').forEach((item, i) => {
+                contacts.push(new ObjectId(item.trim()));
+            });
+            // setup db document
+            var doc = {
   "client_cd": client_cd
 , "client_name": req.body.client_name
 , "client": new ObjectId(req.body.client)
@@ -540,56 +540,56 @@ module.exports = function() {
 , "distance": req.body.distance
 , "active": req.body.active
 };
-			// check action
+            // check action
             if (req.body.id == '') { // add
-				// check for duplicate
-				db.collection('clients')
-	            .findOne(
-	                { 'client_cd': client_cd },
-	                (err, client) => {
-						if (client && client._id != id)
-						{
-		                    assert.equal(null, err);
-		                    console.log(client_cd + " already in the clients collection.");
-		                    //console.log(result);
-		                    res.send('FAIL ' + client_cd + ' already exist!');
-		                    res.end();
-							return false;
-	                	}
-						else {
-							doc.entry_dtm = new Date();
-			                var rec = db.collection('clients')
-			                .insertOne(
-			                    doc,
-			                    (err, result) => {
-			                        assert.equal(err, null);
-			                        console.log("Inserted a document into the clients collection.");
-			                        //console.log(result);
-			                        res.send('SUCCESS');
-			                        res.end();
-			                    }
-			                );
-						}
-					}
-            	);
+                // check for duplicate
+                db.collection('clients')
+                .findOne(
+                    { 'client_cd': client_cd },
+                    (err, client) => {
+                        if (client && client._id != id)
+                        {
+                            assert.equal(null, err);
+                            console.log(client_cd + " already in the clients collection.");
+                            //console.log(result);
+                            res.send('FAIL ' + client_cd + ' already exist!');
+                            res.end();
+                            return false;
+                        }
+                        else {
+                            doc.entry_dtm = new Date();
+                            var rec = db.collection('clients')
+                            .insertOne(
+                                doc,
+                                (err, result) => {
+                                    assert.equal(err, null);
+                                    console.log("Inserted a document into the clients collection.");
+                                    //console.log(result);
+                                    res.send('SUCCESS');
+                                    res.end();
+                                }
+                            );
+                        }
+                    }
+                );
             }
             else { // update
-				var id = req.body.id;
-				delete doc.client_cd;
-				doc.update_dtm = new Date();
+                var id = req.body.id;
+                delete doc.client_cd;
+                doc.update_dtm = new Date();
                 var rec = db.collection('clients')
                 .updateOne(
                     { '_id': new ObjectId(id) },
                     { '$set': doc },
                     (err, result) => {
                         assert.equal(err, null);
-						console.log("Updated a document into the clients collection.");
+                        console.log("Updated a document into the clients collection.");
                         //console.log(result);
                         res.send('SUCCESS');
                         res.end();
                     }
                 );
-			}
+            }
         },
 
         worklog_add: (db, req, res, next) => {
@@ -763,7 +763,7 @@ Comments: " + row.comments + "\n";
   size: 220 }
 */
             var id = req.body.id;
-			var upfile = req.files.upfile;
+            var upfile = req.files.upfile;
             var raw_file = upfile.data;
             var hash = crypto.createHash('md5').update(raw_file).digest("hex");
             var doc = {
@@ -772,7 +772,7 @@ Comments: " + row.comments + "\n";
 , "file_hash": hash
 , "entry_dtm": new Date()
 };
-			//console.log('upfile:',id,doc); res.end('SUCCESS'); return;
+            //console.log('upfile:',id,doc); res.end('SUCCESS'); return;
             var rec = db.collection('projects')
             .updateOne(
                 { '_id': new ObjectId(id) },
@@ -787,12 +787,12 @@ Comments: " + row.comments + "\n";
                         // fs.open(adir + pdir + "/" + hash,"w", (err, fd) => {
                         //     assert.equal(err, null);
                         //     fs.writeFile(fd, raw_file, (err) => {
-						// 		assert.equal(err, null);
-						// 	});
+                        //         assert.equal(err, null);
+                        //     });
                         // });
-						upfile.mv(adir + pdir + "/" + hash, (err) => {
-							assert.equal(err, null);
-						});
+                        upfile.mv(adir + pdir + "/" + hash, (err) => {
+                            assert.equal(err, null);
+                        });
                     });
                     res.send('SUCCESS');
                     res.end();
@@ -800,24 +800,24 @@ Comments: " + row.comments + "\n";
             )
         },
 
-		attachment_get: (db, req, res) => {
-			var id = req.query.id;
-			var idx = req.query.idx;
-			db.collection('projects')
+        attachment_get: (db, req, res) => {
+            var id = req.query.id;
+            var idx = req.query.idx;
+            db.collection('projects')
             .findOne(
                 { '_id': new ObjectId(id) },
                 (err, proj) => {
                     assert.equal(null, err);
-					//console.log(proj);
-					var file = proj.attachments[idx];
-					var pdir = file.file_hash.substr(0,3);
-					res.download(adir + pdir + "/" + file.file_hash, file.file_name, (err, data) => {
-						assert.equal(err, null);
-						res.end();
-					});
-				}
-			);
-		},
+                    //console.log(proj);
+                    var file = proj.attachments[idx];
+                    var pdir = file.file_hash.substr(0,3);
+                    res.download(adir + pdir + "/" + file.file_hash, file.file_name, (err, data) => {
+                        assert.equal(err, null);
+                        res.end();
+                    });
+                }
+            );
+        },
 
         attachment_delete: (db, req, res) => {
             //console.log(req.body); res.end('SUCCESS'); return;
@@ -841,15 +841,15 @@ Comments: " + row.comments + "\n";
             )
         },
 
-		link_add: (db, req, res, next) => {
+        link_add: (db, req, res, next) => {
             //console.log('link_add:',req.body); res.end('SUCCESS'); return;
             var id = req.body.link_proj_id;
-			var link = req.body.lk_link;
+            var link = req.body.lk_link;
             var doc = {
   "url": link
 , "entry_dtm": new Date()
 };
-			//console.log('link:',id,doc); res.end('SUCCESS'); return;
+            //console.log('link:',id,doc); res.end('SUCCESS'); return;
             var rec = db.collection('projects')
             .updateOne(
                 { '_id': new ObjectId(id) },
@@ -860,11 +860,11 @@ Comments: " + row.comments + "\n";
                     console.log(result);
                     res.send('SUCCESS');
                     res.end();
-				}
-			);
+                }
+            );
         },
 
-		link_delete: (db, req, res) => {
+        link_delete: (db, req, res) => {
             console.log('link_delete:',req.body); res.end('SUCCESS'); return;
             var id = req.body.link_proj_id;
             var link = req.body.lk_link;
@@ -883,49 +883,49 @@ Comments: " + row.comments + "\n";
             )
         },
 
-		note_add_update: (db, req, res, next) => {
+        note_add_update: (db, req, res, next) => {
             //console.log('note_add_update:',req.body); res.end('SUCCESS'); return;
             var id = req.body.note_proj_id;
-			var note = req.body.comments.substr(0,512);
-			var note_old = req.body.note_old;
-			var idx = req.body.note_idx;
-			var doc = {
+            var note = req.body.comments.substr(0,512);
+            var note_old = req.body.note_old;
+            var idx = req.body.note_idx;
+            var doc = {
   "user_nm": req.body.user_nm
 , "comments": note
 , "entry_dtm": new Date()
 };
-			if (idx === "")
-			{ // add note
-				//console.log('add note:',id,doc); res.end('SUCCESS'); return;
-	            var rec = db.collection('projects')
-	            .updateOne(
-	                { '_id': new ObjectId(id) },
-	                { '$push': { 'notes': doc } },
-	                (err, result) => {
-	                    assert.equal(err, null);
-	                    console.log("Inserted a note into the projects collection.");
-	                    //console.log(result);
-	                    res.send('SUCCESS');
-	                    res.end();
-					}
-				);
-			}
-			else { // update note
-				//console.log('link:',id,doc); res.end('SUCCESS'); return;
-	            var rec = db.collection('projects')
-	            .updateOne(
-	                { '_id': new ObjectId(id) },
-					{ "$set": { "notes.$[element].comments": note } },
-    				{ "arrayFilters": [ { "element.comments": { "$eq": note_old } } ] },
-	                (err, result) => {
-	                    assert.equal(err, null);
-	                    console.log("Updated a note into the projects collection.");
-	                    //console.log(result);
-	                    res.send('SUCCESS');
-	                    res.end();
-					}
-				);
-			}
+            if (idx === "")
+            { // add note
+                //console.log('add note:',id,doc); res.end('SUCCESS'); return;
+                var rec = db.collection('projects')
+                .updateOne(
+                    { '_id': new ObjectId(id) },
+                    { '$push': { 'notes': doc } },
+                    (err, result) => {
+                        assert.equal(err, null);
+                        console.log("Inserted a note into the projects collection.");
+                        //console.log(result);
+                        res.send('SUCCESS');
+                        res.end();
+                    }
+                );
+            }
+            else { // update note
+                //console.log('link:',id,doc); res.end('SUCCESS'); return;
+                var rec = db.collection('projects')
+                .updateOne(
+                    { '_id': new ObjectId(id) },
+                    { "$set": { "notes.$[element].comments": note } },
+                    { "arrayFilters": [ { "element.comments": { "$eq": note_old } } ] },
+                    (err, result) => {
+                        assert.equal(err, null);
+                        console.log("Updated a note into the projects collection.");
+                        //console.log(result);
+                        res.send('SUCCESS');
+                        res.end();
+                    }
+                );
+            }
         },
 
         admin_lu_list: (db, req, res) => {
@@ -949,7 +949,7 @@ Comments: " + row.comments + "\n";
             db.collection('lookups')
             .findOne(
                 { '_id': type },
-								{ 'items': 1 },
+                                { 'items': 1 },
                 (err, lu) => {
                     assert.equal(null, err);
                     res.json(lu.items);
@@ -962,7 +962,7 @@ Comments: " + row.comments + "\n";
             // check action
             //console.log(req.body); res.end('TEST'); return;
             var type = req.body.lu_type;
-			// setup db document
+            // setup db document
             var doc = {
   "cd": req.body.cd
 , "descr": req.body.descr
@@ -1073,8 +1073,8 @@ Comments: " + row.comments + "\n";
         user_add_update: (db, req, res, next) => {
             // uid, lname, fname, email, active, roles, pw, group
             var pw5 = crypto.createHash('md5').update(req.body.pw).digest("hex");
-			// setup db document
-			var doc = {
+            // setup db document
+            var doc = {
   "uid": req.body.uid2
 , "lname": req.body.lname
 , "fname": req.body.fname
@@ -1102,7 +1102,7 @@ Comments: " + row.comments + "\n";
             else { // update
                 if (req.body.pw == req.body.pw2) pw5 = req.body.pw;
                 else pw5 = crypto.createHash('md5').update(req.body.pw).digest("hex");
-				delete doc.uid; // don't change
+                delete doc.uid; // don't change
                 var id = req.body.id;
                 var rec = db.collection('users')
                 .updateOne(
