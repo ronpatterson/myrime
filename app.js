@@ -35,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 console.log('Current directory: ',process.cwd());
 
-function app_lu_init (db) {
+function app_lu_init (db, req, res) {
     // load lookups with the bt_lookups and bt_users collections
     var cursor = db.collection('lookups').find( { } );
     var results = {};
@@ -60,13 +60,18 @@ function app_lu_init (db) {
             results.users[doc.uid] = doc;
         }, (err) => {
             assert.equal(null, err);
-            //console.log('lookups:'); console.log(results);
+            //console.log('lookups:',results);
             wdb.put_lookups(results);
+            if (res)
+            {
+                res.json(results);
+                res.end();
+            }
         });
     });
 }
 
-function app_init (db) {
+function app_init (db, req, res) {
     // init the session
     app.use(session({
         //secret: process.env.SESSION_SECRET,
@@ -82,7 +87,7 @@ function app_init (db) {
         saveUninitialized: true,
         resave: false
     }));
-    app_lu_init(db);
+    app_lu_init(db, req, res);
 }
 
 MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
@@ -99,8 +104,8 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
 
     app.get('/mt_init', function(req, res) {
         app_init(db, req, res);
-        res.json(wdb.get_lookups());
-        res.end();
+        // res.json(wdb.get_lookups());
+        // res.end();
         //console.log('Lookups loaded');
     });
 

@@ -1044,6 +1044,12 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	mt_note_cancel: function( event )
+	{
+		$('#notes_div').dialog('close');
+		return false;
+	},
+
 	add_worklog: function ( event ) {
 		wdb.showDialogDiv('MyTime Worklog','mt_worklog_form');
 		$('#mt_wl_mt_id').html($('#mt_id2_v').text());
@@ -1881,6 +1887,7 @@ var wdb = // setup the wdb namespace
 		{
 			//console.log(data);
 			wdb.group_data = data;
+			wdb.rebuild_selections(data);
 		});
 	},
 
@@ -1940,6 +1947,7 @@ var wdb = // setup the wdb namespace
 		$('#mt_form9').on('submit',wdb.handle_search);
 		$('#links_form').on('submit',wdb.linkhandler);
 		$('#notes_form').on('submit',wdb.notehandler);
+		$('#note_cancel').on('click',wdb.mt_note_cancel);
 		$('#mt_email_form').on('submit',wdb.email_mt);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
 		$('#mt_lu_form_id').on('submit',wdb.luhandler);
@@ -1961,25 +1969,7 @@ var wdb = // setup the wdb namespace
 			//console.log(data);
 			// setup verious selection lists
 			wdb.group_data = data;
-			var sel = wdb.build_selection('mt_type',data.mt_type);
-			$('#btypes_s').empty().append(sel);
-			var sel = wdb.build_selection('status',data.mt_status);
-			$('#status_s').empty().append(sel);
-			var sel = wdb.build_selection('priority',data.mt_priority);
-			$('#priority_s').empty().append(sel);
-			var sel = wdb.build_selection('mt_type2',data.mt_type);
-			$('#btc_types').empty().append(sel);
-			var sel = wdb.build_selection('client_type',data.mt_type);
-			$('#client_types').empty().append(sel);
-			var sel = wdb.build_selection('status2',data.mt_status);
-			$('#btc_status').empty().append(sel);
-			if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();
-			var sel = wdb.build_contact_selection('client');
-			$('#client_contact_div').empty().append(sel);
-			var sel = wdb.build_contacts_checkboxes('contacts');
-			$('#contacts_checkboxes').empty().append(sel);
-			var sel = wdb.build_client_selection('client');
-			$('#client').empty().append(sel);
+			wdb.rebuild_selections(data);
 			$('.projdate').datepicker(
 			{
 				yearRange: '-5:+10',
@@ -1989,6 +1979,29 @@ var wdb = // setup the wdb namespace
 			//$('#contacts_checkboxes input[type="checkbox"]').on('click',wdb.toggle_contacts);
 			//console.log(sel);
 		});
+	},
+
+	rebuild_selections: function (data)
+	{
+		var sel = wdb.build_selection('mt_type',data.mt_type);
+		$('#btypes_s').empty().append(sel);
+		var sel = wdb.build_selection('status',data.mt_status);
+		$('#status_s').empty().append(sel);
+		var sel = wdb.build_selection('priority',data.mt_priority);
+		$('#priority_s').empty().append(sel);
+		var sel = wdb.build_selection('mt_type2',data.mt_type);
+		$('#btc_types').empty().append(sel);
+		var sel = wdb.build_selection('client_type',data.mt_type);
+		$('#client_types').empty().append(sel);
+		var sel = wdb.build_selection('status2',data.mt_status);
+		$('#btc_status').empty().append(sel);
+		if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();
+		var sel = wdb.build_contact_selection('client');
+		$('#client_contact_div').empty().append(sel);
+		var sel = wdb.build_contacts_checkboxes('contacts');
+		$('#contacts_checkboxes').empty().append(sel);
+		var sel = wdb.build_client_selection('client');
+		$('#client').empty().append(sel);
 	}
 
 } // end of wdb namespace

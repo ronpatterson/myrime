@@ -147,7 +147,7 @@ module.exports = function() {
 , "dates": {}
 };
             if (typeof(req.body['id']) == 'undefined' || req.body.id == '') { // add
-                console.log(req);
+                //console.log(req);
                 // assign a project code
                 db.collection('counters').findOneAndUpdate (
                     { "_id": 'proj_cd' },
@@ -158,7 +158,7 @@ module.exports = function() {
                     },
                     (err, updoc) => {
                         assert.equal(null, err);
-                        console.log(updoc);
+                        //console.log(updoc);
                         var id = updoc.value.seq.valueOf();
                         var client_cd = req.body.client.split(',');
                         doc.client_id = new ObjectId(client_cd[0]);
@@ -307,6 +307,7 @@ module.exports = function() {
                 //doc.entry_dtm = date("m/d/Y g:i a",doc.entry_dtm.sec);
                 doc.name = doc.lname + ', ' + doc.fname;
                 doc.active = doc.active == 'y' ? 'Yes' : 'No';
+                doc.email = '<a href="mailto:' + doc.email + '">' + doc.email + '</a>';
                 //doc.status = getWDDlookup("status",doc.status);
                 results.push(doc);
             }, (err) => {
@@ -327,7 +328,8 @@ module.exports = function() {
                     assert.equal(null, err);
                     contact.edtm = dateFormat(contact.entry_dtm,dateFmt1);
                     contact.udtm = typeof(contact.update_dtm) == 'undefined' ? '' : dateFormat(contact.update_dtm,dateFmt1);
-                    console.log(contact);
+                    contact.email = '<a href="mailto:' + contact.email + '">' + contact.email + '</a>';
+                    //console.log(contact);
                     res.json(contact);
                     res.end();
                 }
@@ -513,7 +515,7 @@ module.exports = function() {
                 (err, contacts) => {
                     assert.equal(null, err);
                     var contacts2 = contacts.toArray();
-                    console.log(contacts2);
+                    //console.log(contacts2);
                     res.json(contacts2);
                     res.end();
                 }
@@ -780,7 +782,7 @@ Comments: " + row.comments + "\n";
                 (err, result) => {
                     assert.equal(err, null);
                     console.log("Inserted a attachment into the projects collection.");
-                    console.log(result);
+                    //console.log(result);
                     var pdir = hash.substr(0,3);
                     fs.access(adir + pdir, fs.R_OK | fs.W_OK, (err) => {
                         if (err) fs.mkdirSync(adir + pdir);
@@ -857,7 +859,7 @@ Comments: " + row.comments + "\n";
                 (err, result) => {
                     assert.equal(err, null);
                     console.log("Inserted a link into the projects collection.");
-                    console.log(result);
+                    //console.log(result);
                     res.send('SUCCESS');
                     res.end();
                 }
