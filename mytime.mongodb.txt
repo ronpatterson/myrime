@@ -104,18 +104,19 @@ db.projects {
 db.worklog {
     "_id" : ObjectId,
     "project": ObjectId, // projects
-    "name" : string,
+    "title" : string,
+    "comments" : string,
+    "public" : char, // y/n
     "catagory" : char, // mt_category
     "kind" :  : char, // mt_kind
-    "billable" : boolean,
+    "billable" : char, // y/n
     "due_date" : ISODate,
     "duration" : {
         "hours": int,
         "mins" : int
     },
     "start_dtm" : ISODate,
-    "end_dtm" : ISODate,
-    "comments" : string
+    "end_dtm" : ISODate
 }
 
 db.users {

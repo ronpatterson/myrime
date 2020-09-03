@@ -312,7 +312,7 @@
                         -->
                         <span onclick="return wdb.show_email(event);">Email Project</span>
                         <span onclick="return wdb.add_proj_note(event);">Add Note</span>
-                        <span onclick="return wdb.add_proj_worklog(event);">Add Worklog</span>
+                        <span onclick="return wdb.add_worklog(event);">Add Worklog</span>
                     </div>
                     <br>
                     <fieldset>
@@ -411,23 +411,34 @@
             </div>
 
             <div id="worklog_form" class="projform content_divs">
-                <form id="form2" name="form2" method="post"><br>
+                <form id="wl_form" name="wl_form" method="post"><br>
+                <input type="hidden" name="wl_proj_id">
                 <fieldset>
                     <legend>WDD MyTime Worklog Record</legend>
                     <label>ID:</label>
-                    <div class="fields2"><span id="wl_bug_id"></span></div><br class="clear">
-                    <label>Description:</label>
-                    <div class="fields2"><span id="wl_descr"></span></div><br class="clear">
-                    <label>Bug Comments:</label>
-                    <div class="fields2"><span id="bug_comments"></span></div><br class="clear">
+                    <div class="fields2"><span id="wl_proj_cd"></span></div><br class="clear">
+                    <label for="wl_title"><span class="required">*</span>Title:</label>
+                    <div class="fields2"><input type="text" name="wl_title" value="" size="40"></div><br class="clear">
+                    <label for="wl_comments"><span class="required">*</span>Worklog Comments:</label>
+                    <div class="fields2"><textarea name="wl_comments" rows="6" cols="40" wrap="virtual"></textarea></div><br class="clear">
                     <label>Public:</label>
                     <div class="fields2"><label class="yesno"><input type="radio" name="wl_public" value="y">Yes</label> <label class="yesno"><input type="radio" name="wl_public" value="n">No</label></div><br class="clear">
-                    <label for="comments"><span class="required">*</span>Worklog Comments:</label>
-                    <div class="fields2"><textarea name="wl_comments" rows="10" cols="40" wrap="virtual"></textarea></div><br class="clear">
+                    <label><span class="required">*</span>Category:</label>
+                    <div class="fields2"><span id="wl_category"></span></div><br class="clear">
+                    <label><span class="required">*</span>Kind:</label>
+                    <div class="fields2"><span id="wl_kind"></span></div><br class="clear">
+                    <label>Billable:</label>
+                    <div class="fields2"><label class="yesno"><input type="radio" name="wl_billable" value="y">Yes</label> <label class="yesno"><input type="radio" name="wl_billable" value="n">No</label></div><br class="clear">
+                    <label>Due Date:</label>
+                    <div class="fields2"><input type="text" name="wl_due_dt" class="projdate" value="" size="12"></div><br class="clear">
+                    <label><span class="required">*</span>Duration:</label>
+                    <div class="fields2">Hours: <span id="wl_hours"></span> : Minutes: <span id="wl_mins"></span></div><br class="clear">
+                    <label><span class="required">*</span>Start Date/Time:</label>
+                    <div class="fields2"><input type="text" name="wl_start_dt" class="projdate" value="" size="12"> <span id="wl_start_tm"></span></div><br class="clear">
+                    <label><span class="required">*</span>End Date/Time:</label>
+                    <div class="fields2"><input type="text" name="wl_end_dt" class="projdate" value="" size="12"> <span id="wl_end_tm"></span></div><br class="clear">
                     <label>Entry By:</label>
                     <div class="fields2"><span id="wl_ename"></span></div><br class="clear">
-                    <label>Bug Entry Date/Time:</label>
-                    <div class="fields2"><span id="wl_entry_dtm"></span></div><br class="clear">
                     <label>&nbsp;</label>
                     <div class="fields2"><input type="submit" value="SAVE"> <input type="button" id="cancel2" value="Cancel"></div><br class="clear">
                 </fieldset>

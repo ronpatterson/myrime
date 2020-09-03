@@ -1051,16 +1051,31 @@ var wdb = // setup the wdb namespace
 	},
 
 	add_worklog: function ( event ) {
-		wdb.showDialogDiv('MyTime Worklog','mt_worklog_form');
-		$('#mt_wl_mt_id').html($('#mt_id2_v').text());
-		$('#mt_wl_descr').html($('#descr_v').html());
-		$('#mt_mt_comments').html($('#comments_v').html());
-		$('input[name="wl_public"][value="n"]').prop('checked',true);
-		$('textarea[name="wl_comments"]').val('');
-		$('#mt_wl_ename').html($('#usernm').html());
-		$('#mt_wl_entry_dtm').html($('#edtm_v').html());
+		var dtm = new Date();
+		// var hr = dtm.getHours();
+		// var dtm1 = (hr<10?'0':hr) + ':15';
+		// ++hr; if (hr>23) hr = 0;
+		// var dtm2 = (hr<10?'0':hr) + ':15';
+		var cdt = dtm.getMonth() + '/' + dtm.getDate() + '/' + dtm.getFullYear();
+		wdb.showDialogDiv('MyTime Worklog','worklog_form');
+		$('#wl_proj_id').val($('#pid').val());
+		$('#wl_proj_cd').html($('#proj_cd2_v').html());
+		$('#wl_form input[type="text"]').val('');
+		$('#wl_form input[name="user_nm"]').val('rlpatter');
+		$('#wl_form textarea[name="wl_comments"]').text('');
+		$('#wl_form input[name="wl_public"]').removeAttr('checked');
+		$('#wl_form input[name="wl_public"][value="y"]').prop('checked',true);
+		$('#wl_form select[name="wl_category"]').val('');
+		$('#wl_form select[name="wl_kind"]').val('');
+		$('#wl_form input[name="wl_billable"]').removeAttr('checked');
+		$('#wl_form input[name="wl_billable"][value="y"]').prop('checked',true);
+		$('#wl_ename').html($('#ename_v').html());
+		$('#wl_form input[name="wl_start_dt"]').val(cdt);
+		$('#wl_form input[name="wl_end_dt"]').val(cdt);
+		$('#wl_form select[name="wl_start_tm"]').val('08:00');
+		$('#wl_form select[name="wl_end_tm"]').val('17:00');
+		$('#wl_entry_dtm').html('');
 		$('#wl_errors').html('');
-		$('textarea[name="wl_comments"]').focus();
 		return true;
 	},
 
@@ -1724,7 +1739,7 @@ var wdb = // setup the wdb namespace
 
 	worklogCancelDialog: function ( event )
 	{
-		$('#mt_worklog_form').dialog('close');
+		$('#worklog_form').dialog('close');
 		wdb.mtlist();
 	},
 
@@ -1875,6 +1890,39 @@ var wdb = // setup the wdb namespace
 		return true;
 	},
 
+	build_time_selection: function ( name )
+	{
+		//debugger;
+		var hours = [ 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ];
+		var min_int = 15; // minutes interval
+		var obj = $('<select></select>').attr('name',name);
+		var opt = $('<option></option>').attr('value','').html('--');
+		obj.append(opt);
+		var ampm = 'AM';
+		hours.forEach( (hr, i) => {
+			for (var m=0; m<60; m+=min_int)
+			{
+				var time = hr + ':' + ((m<10)?'0':'') + m + ' ' + ampm;
+				var time2 = ((i<10)?'0':'') + i + ':' + ((m<10)?'0':'') + m;
+				var opt = $('<option></option>').attr('value', time2).html(time);
+				obj.append(opt);
+			}
+		});
+		ampm = 'PM';
+		hours.forEach( (hr, i) => {
+			for (var m=0; m<60; m+=min_int)
+			{
+				var time = hr + ':' + ((m<10)?'0':'') + m + ' ' + ampm;
+				var h = i+12;
+				var time2 = ((h<10)?'0':'') + h + ':' + ((m<10)?'0':'') + m;
+				var opt = $('<option></option>').attr('value', time2).html(time);
+				obj.append(opt);
+			}
+		});
+		console.log(obj);
+		return obj;
+	},
+
 	reload_lookups: function ( )
 	{
 		var params = 'action=mt_init';
@@ -1954,6 +2002,10 @@ var wdb = // setup the wdb namespace
 		$('#mt_lu_save_cancel').on('click',wdb.lu_save_cancel);
 		$('#mt_user_form_id').on('submit',wdb.userhandler);
 		$('#mt_user_edit_cancel').on('click',wdb.user_edit_cancel);
+		var sel = wdb.build_time_selection('wl_start_tm');
+		$('#wl_start_tm').empty().append(sel);
+		var sel = wdb.build_time_selection('wl_end_tm');
+		$('#wl_end_tm').empty().append(sel);
 		$('#contact_show_buttons span').button();
 		$('#client_show_buttons span').button();
 		$('#proj_show_buttons span').button();
@@ -1995,6 +2047,10 @@ var wdb = // setup the wdb namespace
 		$('#client_types').empty().append(sel);
 		var sel = wdb.build_selection('status2',data.mt_status);
 		$('#btc_status').empty().append(sel);
+		var sel = wdb.build_selection('catagory',data.mt_category);
+		$('#wl_category').empty().append(sel);
+		var sel = wdb.build_selection('kind',data.mt_kind);
+		$('#wl_kind').empty().append(sel);
 		if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();
 		var sel = wdb.build_contact_selection('client');
 		$('#client_contact_div').empty().append(sel);
