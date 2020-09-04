@@ -211,17 +211,18 @@ module.exports = function() {
         },
 
         delete_contact: (db, req, res) => {
-            console.log('delete_contact:',req.body); res.end('SUCCESS'); return false;
+            //console.log('delete_contact:',req.body); res.end('SUCCESS'); return false;
             var id = req.body.id;
             var cname = req.body.cname;
             // check for link to clients
             db.collection('clients')
-            .findOne(
-                { '$or': [ { 'client': id }, { 'contacts': { '$all': [ id ] } } ] },
-                (err, client) => {
-                    if (client)
-                    {
-                        assert.equal(null, err);
+            .countDocuments(
+                { '$or': [ { 'client': new ObjectId(id) }, { 'contacts': { '$all': [ new ObjectId(id) ] } } ] },
+                (err, count) => {
+                    assert.equal(err, null);
+                    //console.log('delete_contact:',count); res.end('SUCCESS'); return false;
+                    if (count > 0)
+                    { // linked to clients
                         console.log(cname + " linked in the clients collection.");
                         //console.log(result);
                         res.send('FAIL ' + cname + ' found in clients!');
@@ -231,13 +232,13 @@ module.exports = function() {
                     else { // good to go
                         db.collection('contacts')
                         .removeOne(
-                        { '_id': new ObjectId(id) },
-                        (err, result) => {
-                              assert.equal(err, null);
-                              console.log("Removed document from the contacts collection.");
-                              //console.log(result);
-                              res.send('SUCCESS');
-                              res.end();
+                            { '_id': new ObjectId(id) },
+                            (err, result) => {
+                                assert.equal(err, null);
+                                console.log("Removed document from the contacts collection.");
+                                //console.log(result);
+                                res.send('SUCCESS');
+                                res.end();
                             }
                         );
                     }
@@ -246,17 +247,18 @@ module.exports = function() {
         },
 
         delete_client: (db, req, res) => {
-            console.log('delete_client:',req.body); res.end('SUCCESS'); return false;
+            //console.log('delete_client:',req.body); res.end('SUCCESS'); return false;
             var id = req.body.id;
             var cname = req.body.client_name;
             // check for link to clients
             db.collection('projects')
-            .findOne(
-                { 'client': id },
-                (err, project) => {
-                    if (project)
+            .countDocuments(
+                { 'client_id': new ObjectId(id) },
+                (err, count) => {
+                    assert.equal(null, err);
+                    //console.log('delete_client:',count); res.end('SUCCESS'); return false;
+                    if (count > 0)
                     {
-                        assert.equal(null, err);
                         console.log(cname + " linked in the projects collection.");
                         //console.log(result);
                         res.send('FAIL ' + cname + ' found in projects!');
@@ -266,13 +268,13 @@ module.exports = function() {
                     else { // good to go
                         db.collection('clients')
                         .removeOne(
-                        { '_id': new ObjectId(id) },
-                        (err, result) => {
-                              assert.equal(err, null);
-                              console.log("Removed document from the clients collection.");
-                              //console.log(result);
-                              res.send('SUCCESS');
-                              res.end();
+                            { '_id': new ObjectId(id) },
+                            (err, result) => {
+                                assert.equal(err, null);
+                                console.log("Removed document from the clients collection.");
+                                //console.log(result);
+                                res.send('SUCCESS');
+                                res.end();
                             }
                         );
                     }

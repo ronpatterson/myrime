@@ -31,6 +31,8 @@ var wdb = // setup the wdb namespace
 	proj_doc: {},
 	dateFmt1: 'mm/dd/yyyy h:MM tt',
 
+	//-- session/login/logout functions
+
 	check_session: function (event)
 	{
 		var params = "action=mt_check_session";
@@ -131,6 +133,8 @@ var wdb = // setup the wdb namespace
 		window.setTimeout(wdb.check_session,1000); // a bit of a delay
 		return false;
 	},
+
+	//-- projects support functions
 
 	mtprojects: function ( event, type )
 	{
@@ -257,6 +261,43 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	validate_proj: function ( )
+	{
+		var datere = /^[01][0-9]\/[0-3][0-9]\/(19|20)[0-9]{2}$/;
+		var hoursre = /^[0-9]+([.][0-9]+)?$/;
+		var numre = /^[0-9]+$/;
+		var err = '';
+		var f = document.proj_form1;
+		//alert(f.serialize()); return err;
+		if (f.client && f.client.value.blank())
+			err += ' - Client must be selected<br>';
+		if (f.name.value.blank())
+			err += ' - Name must not be blank<br>';
+		if (f.po_nbr.value.blank())
+			err += ' - PO Number must not be blank<br>';
+		if (f.priority.value.blank())
+			err += ' - Priority must be selected<br>';
+		if (f.hourly_rate.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (!hoursre.test(f.hourly_rate.value))
+			err += ' - Hourly Rate is not valid (decimal number)<br>';
+		if (!hoursre.test(f.mileage_rate.value))
+			err += ' - Mileage Rate is not valid (decimal number)<br>';
+		if (!numre.test(f.distance.value))
+			err += ' - Distance is not valid (integer)<br>';
+		// if (f.mt_type.value.blank())
+		// 	err += ' - Bug Type must be selected<br>';
+		// if (f.comments.value.blank())
+		// 	err += ' - Comments must not be blank<br>';
+	 	if (f.due.value != '' && !datere.test(f.due.value))
+	 		err += ' - Due Date is not valid (mm/dd/yyyy)<br>';
+		if (f.started.value != '' && !datere.test(f.started.value))
+	 		err += ' - Start Date is not valid (mm/dd/yyyy)<br>';
+		if (f.completed.value != '' && !datere.test(f.completed.value))
+	 		err += ' - Complete Date is not valid (mm/dd/yyyy)<br>';
+		return err;
+	},
+
 	mt_projedit_cancel: function( event )
 	{
 		//alert('mt_proj_cancel');
@@ -360,6 +401,8 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	//-- contacts support functions
+
 	mtcontacts: function ( event )
 	{
 		var params = {
@@ -445,6 +488,24 @@ var wdb = // setup the wdb namespace
 				$('#mt_contactedit_errors').html(response);
 		});
 		return false;
+	},
+
+	validate_contact: function ( )
+	{
+		var err = '';
+		var f = document.contact_form1;
+		//alert(f.serialize()); return err;
+		if (f.lname.value.blank())
+			err += ' - Last Name must not be blank<br>';
+		if (f.email.value.blank())
+			err += ' - Email Address must not be blank<br>';
+		// if (f.mt_type.value.blank())
+		// 	err += ' - Bug Type must be selected<br>';
+		// if (f.comments.value.blank())
+		// 	err += ' - Comments must not be blank<br>';
+	// 	if (!datere.test($('#bdate').val()))
+	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
+		return err;
 	},
 
 	mt_contactedit_cancel: function( event )
@@ -577,7 +638,8 @@ var wdb = // setup the wdb namespace
 	{
 		if (!confirm("Really delete this contact?")) return false;
 		var params = 'action=delete';
-		params += '&id='+$('#cid').val();
+		params += '&id=' + $('#cid').val();
+		params += '&cname=' + $('#cname_v').text();
 		$.ajax({
 			url: 'mt_delete_contact',
 			type: 'post',
@@ -602,6 +664,8 @@ var wdb = // setup the wdb namespace
 		$('#contactedit_div').hide();
 		return false;
 	},
+
+	//-- contacts support functions
 
 	mtclients: function ( event )
 	{
@@ -785,11 +849,45 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	validate_client: function ( )
+	{
+		var err = '';
+		var codere = /^[A-Z][A-Za-z]+$/;
+		var hoursre = /^[0-9]+([.][0-9]+)?$/;
+		var numre = /^[0-9]+$/;
+		var f = document.client_form1;
+		//alert(f.serialize()); return err;
+		if (f.client_cd.value.blank())
+			err += ' - Client Code must not be blank<br>';
+		if (!codere.test(f.client_cd.value))
+			err += ' - Client Code is not valid<br>';
+		if (f.client_cd.value.blank())
+			err += ' - Client Code must not be blank<br>';
+		if (f.client.value.blank())
+			err += ' - Client Contact must be selected<br>';
+		if (f.client_type.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (f.hourly_rate.value.blank())
+			err += ' - Client Type must be selected<br>';
+		if (!hoursre.test(f.hourly_rate.value))
+			err += ' - Hourly Rate is not valid (decimal number)<br>';
+		if (!hoursre.test(f.mileage_rate.value))
+			err += ' - Mileage Rate is not valid (decimal number)<br>';
+		if (!numre.test(f.distance.value))
+			err += ' - Distance is not valid (integer)<br>';
+		// if (f.comments.value.blank())
+		// 	err += ' - Comments must not be blank<br>';
+	// 	if (!datere.test($('#bdate').val()))
+	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
+		return err;
+	},
+
 	delete_client: function ( event )
 	{
 		if (!confirm("Really delete this client?")) return false;
 		var params = 'action=delete';
-		params += '&id='+$('#clientid').val();
+		params += '&id=' + $('#clientid').val();
+		params += '&client_name=' + $('#client_contact_v').text();
 		$.ajax({
 			url: 'mt_delete_client',
 			type: 'post',
@@ -815,35 +913,7 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
-	worklog_show: function ( event, data )
-	{
-		//$('#worklog_div').empty();
-		$('#worklog_div').html('No Worklog entries'); return false;
-		var div = $('#worklog_div');
-		if (!data.worklog || data.worklog.length == 0)
-			div.html('No worklog records');
-		else
-		{
-			var tbl = $('<table></table>');
-			div.append(tbl);
-			var wl = data.worklog;
-			for (var x=0; x<wl.length; ++x)
-			{
-			    var uname = wdb.group_data.users[wl[x].user_nm] ? wdb.group_data.users[wl[x].user_nm].name : 'n/a';
-				var tr = $('<tr><th>Date/Time: '+wl[x].edtm+' by '+uname+'</th></tr>');
-				div.append(tr);
-				tr = $('<tr><td>'+wdb.nl2br(wl[x].comments)+'<hr></td></tr>');
-				div.append(tr);
-			}
-		}
-	},
-
-	mt_worklog_cancel: function( event )
-	{
-		$('#mtshow_div').show();
-		$('#mtedit_div').hide();
-		return false;
-	},
+	//-- other functions
 
 	mthelp: function ( event )
 	{
@@ -938,6 +1008,8 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	//-- project links functions
+
 	add_link: function ( event ) {
 		wdb.showDialogDiv('MyTime Links','links_div');
 		$('#lk_proj_cd').html($('#proj_cd2_v').html());
@@ -981,6 +1053,8 @@ var wdb = // setup the wdb namespace
 		});
 		return false;
 	},
+
+	//-- project notes support functions
 
 	add_proj_note: function ( event ) {
 		wdb.showDialogDiv('MyTime Notes','notes_div');
@@ -1050,6 +1124,8 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	//-- worklog support functions
+
 	add_worklog: function ( event ) {
 		var dtm = new Date();
 		// var hr = dtm.getHours();
@@ -1058,7 +1134,7 @@ var wdb = // setup the wdb namespace
 		// var dtm2 = (hr<10?'0':hr) + ':15';
 		var cdt = dtm.getMonth() + '/' + dtm.getDate() + '/' + dtm.getFullYear();
 		wdb.showDialogDiv('MyTime Worklog','worklog_form');
-		$('#wl_proj_id').val($('#pid').val());
+		$('#wl_form input[name="wl_proj_id"]').val($('#pid').val());
 		$('#wl_proj_cd').html($('#proj_cd2_v').html());
 		$('#wl_form input[type="text"]').val('');
 		$('#wl_form input[name="user_nm"]').val('rlpatter');
@@ -1069,6 +1145,7 @@ var wdb = // setup the wdb namespace
 		$('#wl_form select[name="wl_kind"]').val('');
 		$('#wl_form input[name="wl_billable"]').removeAttr('checked');
 		$('#wl_form input[name="wl_billable"][value="y"]').prop('checked',true);
+		$('#wl_form select[name="wl_duration"]').val('1:00');
 		$('#wl_ename').html($('#ename_v').html());
 		$('#wl_form input[name="wl_start_dt"]').val(cdt);
 		$('#wl_form input[name="wl_end_dt"]').val(cdt);
@@ -1080,21 +1157,17 @@ var wdb = // setup the wdb namespace
 	},
 
 	workloghandler: function( event ) {
-		//alert('workloghandler '+$('#mt_form2').serialize()); return false;
-		//var err = wdb.validate();
-		var err = '';
-		if ($('textarea[name="wl_comments"]').val().blank())
-			err += ' - Worklog Comments must not be blank<br>';
+		//alert('workloghandler '+$('#wl_form').serialize()); return false;
+		var err = wdb.validate_worklog();
 		if (err != '')
 		{
 			$('#wl_errors').html('Errors encountered:<br>'+err);
 			return false;
 		}
-		var id = $('#bid').val();
-		var params = 'action=worklog_add&'+$('#mt_form2').serialize();
+		var id = $('#pid').val();
+		var params = 'action=worklog_add&'+$('#wl_form').serialize();
 		params += '&usernm='+$('#userid').val();
 		params += '&id='+id;
-		params += '&mt_id='+$('#mt_id').val();
 		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'worklog_add',
@@ -1105,8 +1178,8 @@ var wdb = // setup the wdb namespace
 		{
 			if (/^SUCCESS/.test(response))
 			{
-				$('#mt_worklog_form').dialog('close');
-				wdb.mtshow(event,$('#bid').val());
+				$('#worklog_form').dialog('close');
+				wdb.worklog_show(event);
 				//window.setTimeout(function(){wdb.mtshow(event,id);},200);
 			}
 			else
@@ -1115,12 +1188,63 @@ var wdb = // setup the wdb namespace
 		return false;
 	},
 
+	validate_worklog: function ( )
+	{
+		var datere = /^[01][0-9]\/[0-3][0-9]\/(19|20)[0-9]{2}$/;
+		var err = '';
+		var f = document.wl_form;
+		if (f.wl_title.value.blank())
+			err += ' - Title must not be blank<br>';
+		if (f.wl_comments.value.blank())
+			err += ' - Comments must not be blank<br>';
+		if (f.wl_category.value.blank())
+			err += ' - Category must be selected<br>';
+		if (f.wl_kind.value.blank())
+			err += ' - Kind must be selected<br>';
+		if (f.wl_duration.value.blank())
+			err += ' - Duration must be selected<br>';
+	 	if ($('#wl_due_dt').val() != '' && !datere.test($('#wl_due_dt').val()))
+	 		err += ' - Due date is not valid (mm/dd/yyyy)<br>';
+		return err;
+	},
+
+	worklogCancelDialog: function ( event )
+	{
+		$('#worklog_form').dialog('close');
+		wdb.worklog_show(event);
+	},
+
+	worklog_show: function ( event, data )
+	{
+		//$('#worklog_div').empty();
+		$('#worklog_div').html('No Worklog entries'); return false;
+		var div = $('#worklog_div');
+		if (!data.worklog || data.worklog.length == 0)
+			div.html('No worklog records');
+		else
+		{
+			var tbl = $('<table></table>');
+			div.append(tbl);
+			var wl = data.worklog;
+			for (var x=0; x<wl.length; ++x)
+			{
+			    var uname = wdb.group_data.users[wl[x].user_nm] ? wdb.group_data.users[wl[x].user_nm].name : 'n/a';
+				var tr = $('<tr><th>Date/Time: '+wl[x].edtm+' by '+uname+'</th></tr>');
+				div.append(tr);
+				tr = $('<tr><td>'+wdb.nl2br(wl[x].comments)+'<hr></td></tr>');
+				div.append(tr);
+			}
+		}
+	},
+
 	get_worklog: function (id) {
 		$('#worklogDiv').html("Loading...");
 		//alert("search_list called");
 		$('#worklogDiv').load('mtworklogAjax.php', { id: id });
 		return false;
 	},
+
+	//-- utility functions
 
 	get_files: function ( event )
 	{
@@ -1263,112 +1387,6 @@ var wdb = // setup the wdb namespace
 			$('#email_errors').html(response);
 		});
 		return false;
-	},
-
-	validate_client: function ( )
-	{
-		var err = '';
-		var codere = /^[A-Z][A-Za-z]+$/;
-		var hoursre = /^[0-9]+([.][0-9]+)?$/;
-		var numre = /^[0-9]+$/;
-		var f = document.client_form1;
-		//alert(f.serialize()); return err;
-		if (f.client_cd.value.blank())
-			err += ' - Client Code must not be blank<br>';
-		if (!codere.test(f.client_cd.value))
-			err += ' - Client Code is not valid<br>';
-		if (f.client_cd.value.blank())
-			err += ' - Client Code must not be blank<br>';
-		if (f.client.value.blank())
-			err += ' - Client Contact must be selected<br>';
-		if (f.client_type.value.blank())
-			err += ' - Client Type must be selected<br>';
-		if (f.hourly_rate.value.blank())
-			err += ' - Client Type must be selected<br>';
-		if (!hoursre.test(f.hourly_rate.value))
-			err += ' - Hourly Rate is not valid (decimal number)<br>';
-		if (!hoursre.test(f.mileage_rate.value))
-			err += ' - Mileage Rate is not valid (decimal number)<br>';
-		if (!numre.test(f.distance.value))
-			err += ' - Distance is not valid (integer)<br>';
-		// if (f.comments.value.blank())
-		// 	err += ' - Comments must not be blank<br>';
-	// 	if (!datere.test($('#bdate').val()))
-	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
-		return err;
-	},
-
-	validate_contact: function ( )
-	{
-		var err = '';
-		var f = document.contact_form1;
-		//alert(f.serialize()); return err;
-		if (f.lname.value.blank())
-			err += ' - Last Name must not be blank<br>';
-		if (f.email.value.blank())
-			err += ' - Email Address must not be blank<br>';
-		// if (f.mt_type.value.blank())
-		// 	err += ' - Bug Type must be selected<br>';
-		// if (f.comments.value.blank())
-		// 	err += ' - Comments must not be blank<br>';
-	// 	if (!datere.test($('#bdate').val()))
-	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
-		return err;
-	},
-
-	validate_proj: function ( )
-	{
-		var datere = /^[01][0-9]\/[0-3][0-9]\/(19|20)[0-9]{2}$/;
-		var hoursre = /^[0-9]+([.][0-9]+)?$/;
-		var numre = /^[0-9]+$/;
-		var err = '';
-		var f = document.proj_form1;
-		//alert(f.serialize()); return err;
-		if (f.client && f.client.value.blank())
-			err += ' - Client must be selected<br>';
-		if (f.name.value.blank())
-			err += ' - Name must not be blank<br>';
-		if (f.po_nbr.value.blank())
-			err += ' - PO Number must not be blank<br>';
-		if (f.priority.value.blank())
-			err += ' - Priority must be selected<br>';
-		if (f.hourly_rate.value.blank())
-			err += ' - Client Type must be selected<br>';
-		if (!hoursre.test(f.hourly_rate.value))
-			err += ' - Hourly Rate is not valid (decimal number)<br>';
-		if (!hoursre.test(f.mileage_rate.value))
-			err += ' - Mileage Rate is not valid (decimal number)<br>';
-		if (!numre.test(f.distance.value))
-			err += ' - Distance is not valid (integer)<br>';
-		// if (f.mt_type.value.blank())
-		// 	err += ' - Bug Type must be selected<br>';
-		// if (f.comments.value.blank())
-		// 	err += ' - Comments must not be blank<br>';
-	 	if (f.due.value != '' && !datere.test(f.due.value))
-	 		err += ' - Due Date is not valid (mm/dd/yyyy)<br>';
-		if (f.started.value != '' && !datere.test(f.started.value))
-	 		err += ' - Start Date is not valid (mm/dd/yyyy)<br>';
-		if (f.completed.value != '' && !datere.test(f.completed.value))
-	 		err += ' - Complete Date is not valid (mm/dd/yyyy)<br>';
-		return err;
-	},
-
-	validate: function ( )
-	{
-		var datere = /^[01][0-9]\/[0-3][0-9]\/(19|20)[0-9]{2}$/;
-		var err = '';
-		var f = document.mt_form1;
-		if (f.descr.value.blank())
-			err += ' - Description must not be blank<br>';
-		if (f.product.value.blank())
-			err += ' - Product or Application must not be blank<br>';
-		if (f.mt_type.value.blank())
-			err += ' - Bug Type must be selected<br>';
-		if (f.comments.value.blank())
-			err += ' - Comments must not be blank<br>';
-	// 	if (!datere.test($('#bdate').val()))
-	// 		err += ' - Birth date is not valid (mm/dd/yyyy)<br>';
-		return err;
 	},
 
 	mtadmin: function ( event )
@@ -1737,12 +1755,6 @@ var wdb = // setup the wdb namespace
 		wdb.mtlist();
 	},
 
-	worklogCancelDialog: function ( event )
-	{
-		$('#worklog_form').dialog('close');
-		wdb.mtlist();
-	},
-
 	nl2br: function ( val )
 	{
 		return val.replace(/\r?\n/g,'<br>');
@@ -1902,8 +1914,8 @@ var wdb = // setup the wdb namespace
 		hours.forEach( (hr, i) => {
 			for (var m=0; m<60; m+=min_int)
 			{
-				var time = hr + ':' + ((m<10)?'0':'') + m + ' ' + ampm;
-				var time2 = ((i<10)?'0':'') + i + ':' + ((m<10)?'0':'') + m;
+				var time = sprintf('%i:%02i %s',hr,m,ampm);
+				var time2 = sprintf('%02i:%02i',hr,m);
 				var opt = $('<option></option>').attr('value', time2).html(time);
 				obj.append(opt);
 			}
@@ -1912,13 +1924,33 @@ var wdb = // setup the wdb namespace
 		hours.forEach( (hr, i) => {
 			for (var m=0; m<60; m+=min_int)
 			{
-				var time = hr + ':' + ((m<10)?'0':'') + m + ' ' + ampm;
+				var time = sprintf('%i:%02i %s',hr,m,ampm);
 				var h = i+12;
-				var time2 = ((h<10)?'0':'') + h + ':' + ((m<10)?'0':'') + m;
+				var time2 = sprintf('%02i:%02i',h,m);
 				var opt = $('<option></option>').attr('value', time2).html(time);
 				obj.append(opt);
 			}
 		});
+		console.log(obj);
+		return obj;
+	},
+
+	build_duration_selection: function ( name )
+	{
+		//debugger;
+		var min_int = 15; // minutes interval
+		var obj = $('<select></select>').attr('name',name);
+		var opt = $('<option></option>').attr('value','').html('--');
+		obj.append(opt);
+		for (var hr=0; hr<12; ++hr)
+		{
+			for (var m=0; m<60; m+=min_int)
+			{
+				var time = sprintf('%i:%02i',hr,m);
+				var opt = $('<option></option>').attr('value', time).html(time);
+				obj.append(opt);
+			}
+		};
 		console.log(obj);
 		return obj;
 	},
@@ -1997,6 +2029,7 @@ var wdb = // setup the wdb namespace
 		$('#notes_form').on('submit',wdb.notehandler);
 		$('#note_cancel').on('click',wdb.mt_note_cancel);
 		$('#mt_email_form').on('submit',wdb.email_mt);
+		$('#wl_form').on('submit',wdb.workloghandler);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
 		$('#mt_lu_form_id').on('submit',wdb.luhandler);
 		$('#mt_lu_save_cancel').on('click',wdb.lu_save_cancel);
@@ -2006,6 +2039,8 @@ var wdb = // setup the wdb namespace
 		$('#wl_start_tm').empty().append(sel);
 		var sel = wdb.build_time_selection('wl_end_tm');
 		$('#wl_end_tm').empty().append(sel);
+		var sel = wdb.build_duration_selection('wl_duration');
+		$('#wl_duration').empty().append(sel);
 		$('#contact_show_buttons span').button();
 		$('#client_show_buttons span').button();
 		$('#proj_show_buttons span').button();

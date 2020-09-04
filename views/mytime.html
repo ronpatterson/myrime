@@ -11,6 +11,7 @@
         <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
         <script type="text/javascript" charset="utf-8" src="//cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
         <script type="text/javascript" src="js/mytime.js"></script>
+        <script type="text/javascript" src="js/sprintf.js"></script>
         <style type="text/css">
             button:hover { font-weight: bold; }
         </style>
@@ -432,7 +433,7 @@
                     <label>Due Date:</label>
                     <div class="fields2"><input type="text" name="wl_due_dt" class="projdate" value="" size="12"></div><br class="clear">
                     <label><span class="required">*</span>Duration:</label>
-                    <div class="fields2">Hours: <span id="wl_hours"></span> : Minutes: <span id="wl_mins"></span></div><br class="clear">
+                    <div class="fields2"><span id="wl_duration"></span> Hours:Minutes</div><br class="clear">
                     <label><span class="required">*</span>Start Date/Time:</label>
                     <div class="fields2"><input type="text" name="wl_start_dt" class="projdate" value="" size="12"> <span id="wl_start_tm"></span></div><br class="clear">
                     <label><span class="required">*</span>End Date/Time:</label>
