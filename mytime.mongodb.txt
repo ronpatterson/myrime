@@ -106,6 +106,7 @@ db.worklog {
     "project": ObjectId, // projects
     "title" : string,
     "comments" : string,
+    "userid" : string,
     "public" : char, // y/n
     "catagory" : char, // mt_category
     "kind" :  : char, // mt_kind
@@ -116,7 +117,8 @@ db.worklog {
         "mins" : int
     },
     "start_dtm" : ISODate,
-    "end_dtm" : ISODate
+    "end_dtm" : ISODate,
+    "entry_dtm" : ISODate
 }
 
 db.users {

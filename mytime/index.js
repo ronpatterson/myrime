@@ -596,58 +596,83 @@ module.exports = function() {
             }
         },
 
-        worklog_add: (db, req, res, next) => {
-            //console.log(req.body); res.end('TEST'); return;
-            var id = req.body.id;
+        get_worklog_entries: (db, req, res) => {
+            //console.log('contacts_list',req);
+            var results = [];
+            var crit = {};
+            var cursor = db.collection('worklog').find(crit);
+            cursor.sort({'entry_dtm':-1});
+            cursor.forEach((doc) => {
+                //console.log(doc);
+                //doc.edtm = date("m/d/Y g:i a",doc.entry_dtm);
+                doc.edtm = dateFormat(doc.entry_dtm,dateFmt2);
+                doc.public = doc.public == 'y' ? 'Yes' : 'No';
+                doc.billable = doc.billable == 'y' ? 'Yes' : 'No';
+                //doc.status = getWDDlookup("status",doc.status);
+                results.push(doc);
+            }, (err) => {
+                assert.equal(null, err);
+                results = {'data':results};
+                //console.log(results);
+                res.json(results);
+                res.end();
+            });
+        },
+
+        get_worklog: (db, req, res) => {
+            //console.log('get_worklog:',req);
+            var id = req.query.wlid;
+            db.collection('worklog')
+            .findOne(
+                { '_id': new ObjectId(id) },
+                (err, doc) => {
+                    assert.equal(null, err);
+                    //console.log(doc);
+                    //doc.edtm = date("m/d/Y g:i a",doc.entry_dtm);
+                    doc.public = doc.public == 'y' ? 'Yes' : 'No';
+                    doc.billable = doc.billable == 'y' ? 'Yes' : 'No';
+                    doc.duedt = dateFormat(doc.due_date,dateFmt2);
+                    doc.category = getWDDlookup("mt_category",doc.category);
+                    doc.kind = getWDDlookup("mt_kind",doc.kind);
+                    doc.sdtm = dateFormat(doc.start_dtm,dateFmt1);
+                    doc.edtm = dateFormat(doc.end_dtm,dateFmt1);
+                    doc.entrydtm = dateFormat(doc.entry_dtm,dateFmt1);
+                    console.log(doc);
+                    res.json(doc);
+                    res.end();
+                }
+            );
+        },
+
+        worklog_add_edit: (db, req, res, next) => {
+            //console.log('worklog_add_edit',req.body); res.end('TEST'); return;
+            var id = req.body.wlid;
+            var arr = req.body.wl_duration.split(':');
             var doc = {
-  "user_nm": req.body.usernm
+  "project": new ObjectId(req.body.wl_proj_id)
+, "title": req.body.wl_title
 , "comments": req.body.wl_comments
-, "wl_public": req.body.wl_public
+, "userid": req.body.userid
+, "public": req.body.wl_public
+, "category": req.body.wl_category
+, "kind": req.body.wl_kind
+, "billable": req.body.wl_billable
+, "due_date": new Date(req.body.wl_due_dt)
+, "duration": { 'hours': arr[0], 'mins': arr[1] }
+, "start_dtm": new Date(req.body.wl_start_dt + ' ' + req.body.wl_start_tm)
+, "end_dtm": new Date(req.body.wl_end_dt + ' ' + req.body.wl_end_tm)
 , "entry_dtm": new Date()
 };
             //console.log(bug,doc); res.end('SUCCESS'); return;
-            var rec = db.collection('bugs')
-            .updateOne(
-                { '_id': new ObjectId(id) },
-                { '$push': { 'worklog': doc } },
+            var rec = db.collection('worklog')
+            .insertOne(
+                doc,
                 (err, result) => {
                     assert.equal(err, null);
-                    console.log("Inserted a worklog into the bugs collection.");
+                    console.log("Inserted into the worklog collection.");
                     //console.log(result);
                     res.send('SUCCESS');
                     res.end();
-                }
-            )
-        },
-
-        worklog_updateX: (db, req, res, next) => {
-            //console.log(req.body); res.end('TEST'); return;
-            var id = req.body.id;
-            var idx = req.body.idx;
-            db.collection('bugs')
-            .findOne(
-                { '_id': new ObjectId(id) },
-                (err, bug) => {
-                    assert.equal(null, err);
-                    var doc = {
-  "user_nm": req.body.usernm
-, "comments": req.body.wl_comments
-, "wl_public": req.body.wl_public
-, "entry_dtm": new Date()
-};
-                    bug.worklog[idx] = doc;
-                    var rec = db.collection('bugs')
-                    .updateOne(
-                        { '_id': new ObjectId(id) },
-                        { '$set': { 'worklog': bug.worklog } },
-                        (err, result) => {
-                            assert.equal(err, null);
-                            console.log("Updated a worklog in the bugs collection.");
-                            //console.log(result);
-                            res.send('SUCCESS');
-                            res.end();
-                        }
-                    )
                 }
             )
         },

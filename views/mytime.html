@@ -411,9 +411,43 @@
                 <div id="notes_errors"></div>
             </div>
 
+            <div id="worklog_show" class="projform content_divs">
+                <input type="hidden" name="wlid" id="wlid_v" value="">
+                <fieldset>
+                    <legend>WDD MyTime Worklog Record</legend>
+                    <label>Title:</label>
+                    <div class="fields2"><span id="wl_title_v"></span></div><br class="clear">
+                    <label>Comments:</label>
+                    <div class="fields2"><span id="wl_comments_v"></span></div><br class="clear">
+                    <label>Entry By:</label>
+                    <div class="fields2"><span id="wl_userid_v"></span></div><br class="clear">
+                    <label>Public:</label>
+                    <div class="fields2"><span id="wl_public_v"></span></div><br class="clear">
+                    <label>Category:</label>
+                    <div class="fields2"><span id="wl_category_v"></span></div><br class="clear">
+                    <label>Kind:</label>
+                    <div class="fields2"><span id="wl_kind_v"></span></div><br class="clear">
+                    <label>Billable:</label>
+                    <div class="fields2"><span id="wl_billable_v"></span></div><br class="clear">
+                    <label>Due Date:</label>
+                    <div class="fields2"><span id="wl_due_dt_v"></span></div><br class="clear">
+                    <label>Duration:</label>
+                    <div class="fields2"><span id="wl_duration_v"></span> Hours:Minutes</div><br class="clear">
+                    <label>Start Date/Time:</label>
+                    <div class="fields2"><span id="wl_start_dtm_v"></span></div><br class="clear">
+                    <label>End Date/Time:</label>
+                    <div class="fields2"><span id="wl_end_dtm_v"></span></div><br class="clear">
+                    <label>Entry Date/Time:</label>
+                    <div class="fields2"><span id="wl_edtm_v"></span></div><br class="clear">
+                    <label>&nbsp;</label>
+                    <div class="fields2"><input type="button" id="wl_show_edit" value="Edit Worklog"> <input type="button" id="wl_show_cancel" value="Cancel"></div><br class="clear">
+                </fieldset>
+            </div>
+
             <div id="worklog_form" class="projform content_divs">
                 <form id="wl_form" name="wl_form" method="post"><br>
                 <input type="hidden" name="wl_proj_id">
+                <input type="hidden" name="wlid">
                 <fieldset>
                     <legend>WDD MyTime Worklog Record</legend>
                     <label>ID:</label>

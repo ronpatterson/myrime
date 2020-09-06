@@ -15,6 +15,7 @@ const express = require('express'),
     path = require("path"),
     assert = require('assert'),
     mytime = require('./mytime'),
+    sprintf = require('sprintf-js').sprintf,
     wdb = new mytime();
 const MongoDBStore = require('connect-mongo')(session);
 
@@ -161,12 +162,16 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
         wdb.delete_proj(db, req, res);
     });
 
-    app.post('/worklog_add', function(req, res, next) {
-        wdb.worklog_add(db, req, res, next);
+    app.post('/worklog_add_edit', function(req, res, next) {
+        wdb.worklog_add_edit(db, req, res, next);
     });
 
-    app.post('/worklog_updateX', function(req, res, next) {
-        wdb.worklog_updateX(db, req, res, next);
+    app.get('/get_worklog_entries', function(req, res, next) {
+        wdb.get_worklog_entries(db, req, res, next);
+    });
+
+    app.get('/get_worklog', function(req, res, next) {
+        wdb.get_worklog(db, req, res, next);
     });
 
     app.post('/assign_user', function(req, res, next) {

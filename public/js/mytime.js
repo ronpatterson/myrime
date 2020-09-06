@@ -367,7 +367,7 @@ var wdb = // setup the wdb namespace
 			dataType: 'json'
 		}).done(function (data)
 		{
-			console.log(data);
+			//console.log(data);
 			wdb.proj_doc = data;
 			//$('#mt_projs_show_edit').dialog('option','title','WDD MyTime Project '+data.mt_id);
 			$('#mt_admin_errors').html('');
@@ -392,7 +392,7 @@ var wdb = // setup the wdb namespace
 			wdb.get_files(event);
 			wdb.get_links(event);
 			wdb.notes_show(event);
-			wdb.worklog_show(event,data);
+			wdb.worklog_show(event);
 			//wdb.mt_save_cancel();
 			wdb.hideview_content($('#projects_list'),$('#project_show_edit'));
 			$('#projshow_div').show();
@@ -470,7 +470,6 @@ var wdb = // setup the wdb namespace
 		}
 		var id = $('#contact_id').val();
 		var params = 'action=contact_add_update&'+$('#contactedit_form1').serialize();
-		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'mt_add_update_contact',
 			type: 'post',
@@ -614,7 +613,6 @@ var wdb = // setup the wdb namespace
 		}
 		var id = $('#contact_id').val();
 		var params = 'action=contact_add_update&'+$('#contactedit_form1').serialize();
-		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'mt_add_update_contact',
 			type: 'post',
@@ -829,7 +827,6 @@ var wdb = // setup the wdb namespace
 		}
 		var id = $('#client_id').val();
 		var params = 'action=client_add_update&'+$('#clientedit_form1').serialize();
-		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'mt_add_update_client',
 			type: 'post',
@@ -1034,7 +1031,6 @@ var wdb = // setup the wdb namespace
 		var id = $('#pid').val();
 		var params = 'action=link_add&'+$('#links_form').serialize();
 		params += '&id='+id;
-		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'link_add',
 			type: 'post',
@@ -1098,7 +1094,6 @@ var wdb = // setup the wdb namespace
 		var id = $('#pid').val();
 		var params = 'action=note_add_update&'+$('#notes_form').serialize();
 		params += '&id='+id;
-		//alert('workloghandler '+params);
 		$.ajax({
 			url: 'note_add_update',
 			type: 'post',
@@ -1126,13 +1121,40 @@ var wdb = // setup the wdb namespace
 
 	//-- worklog support functions
 
+	show_proj_worklog: function ( event, wlid ) {
+		wdb.showDialogDiv('MyTime Worklog','worklog_show');
+		var params = "action=show&wlid="+wlid;
+		$.ajax({
+			url: 'get_worklog',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//console.log(data);
+			$('#wl_title_v').text(data.title);
+			$('#wl_userid_v').html(data.userid);
+			$('#wl_comments_v').text(data.comments);
+			$('#wl_public_v').text(data.public);
+			$('#wl_category_v').text(data.category);
+			$('#wl_kind_v').text(data.kind);
+			$('#wl_billable_v').text(data.billable);
+			$('#wl_due_dt_v').text(data.duedt);
+			$('#wl_duration_v').text(sprintf('%d:%02d',data.duration.hours,data.duration.mins));
+			$('#wl_start_dtm_v').text(data.sdtm);
+			$('#wl_end_dtm_v').text(data.edtm);
+			$('#wl_edtm_v').text(data.entrydtm);
+		});
+		return true;
+	},
+
 	add_worklog: function ( event ) {
 		var dtm = new Date();
 		// var hr = dtm.getHours();
 		// var dtm1 = (hr<10?'0':hr) + ':15';
 		// ++hr; if (hr>23) hr = 0;
 		// var dtm2 = (hr<10?'0':hr) + ':15';
-		var cdt = dtm.getMonth() + '/' + dtm.getDate() + '/' + dtm.getFullYear();
+		var cdt = sprintf('%02d/%02d/%04d', dtm.getMonth(), dtm.getDate(), dtm.getFullYear());
 		wdb.showDialogDiv('MyTime Worklog','worklog_form');
 		$('#wl_form input[name="wl_proj_id"]').val($('#pid').val());
 		$('#wl_proj_cd').html($('#proj_cd2_v').html());
@@ -1156,6 +1178,42 @@ var wdb = // setup the wdb namespace
 		return true;
 	},
 
+	edit_worklog: function ( event, wlid ) {
+		wdb.showDialogDiv('MyTime Worklog','worklog_form');
+		$('#wl_form input[name="wl_proj_id"]').val($('#pid').val());
+		$('#wl_proj_cd').html($('#proj_cd2_v').html());
+		var params = "action=show&id="+wlid;
+		$.ajax({
+			url: 'mt_get_worklog',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
+		{
+			//console.log(data);
+			$('#wl_form input[type="text"]').val(data.title);
+			$('#wl_form input[name="user_nm"]').val(data.usernm);
+			$('#wl_form textarea[name="wl_comments"]').text(data.comments);
+			$('#wl_form input[name="wl_public"]').removeAttr('checked');
+			if (data.public == 'y') $('input[name="wl_public"][value="y"]').prop('checked',true);
+			else $('input[name="wl_public"][value="n"]').prop('checked',true);
+			$('#wl_form select[name="wl_category"]').val(data.category);
+			$('#wl_form select[name="wl_kind"]').val(data.kind);
+			$('#wl_form input[name="wl_billable"]').removeAttr('checked');
+			if (data.billable == 'y') $('input[name="wl_billable"][value="y"]').prop('checked',true);
+			else $('input[name="wl_billable"][value="n"]').prop('checked',true);
+			$('#wl_form select[name="wl_duration"]').val(data.duration);
+			$('#wl_ename').html(data.usernm);
+			$('#wl_form input[name="wl_start_dt"]').val(data.sdt);
+			$('#wl_form input[name="wl_end_dt"]').val(data.edt);
+			$('#wl_form select[name="wl_start_tm"]').val(data.stm);
+			$('#wl_form select[name="wl_end_tm"]').val(data.etm);
+			$('#wl_entry_dtm').html(edtm);
+			$('#wl_errors').html('');
+		});
+		return true;
+	},
+
 	workloghandler: function( event ) {
 		//alert('workloghandler '+$('#wl_form').serialize()); return false;
 		var err = wdb.validate_worklog();
@@ -1164,13 +1222,10 @@ var wdb = // setup the wdb namespace
 			$('#wl_errors').html('Errors encountered:<br>'+err);
 			return false;
 		}
-		var id = $('#pid').val();
-		var params = 'action=worklog_add&'+$('#wl_form').serialize();
-		params += '&usernm='+$('#userid').val();
-		params += '&id='+id;
-		//alert('workloghandler '+params);
+		var params = 'action=worklog_add_edit&'+$('#wl_form').serialize();
+		params += '&userid='+$('#userid').val();
 		$.ajax({
-			url: 'worklog_add',
+			url: 'worklog_add_edit',
 			type: 'post',
 			data: params,
 			dataType: 'html'
@@ -1203,7 +1258,7 @@ var wdb = // setup the wdb namespace
 			err += ' - Kind must be selected<br>';
 		if (f.wl_duration.value.blank())
 			err += ' - Duration must be selected<br>';
-	 	if ($('#wl_due_dt').val() != '' && !datere.test($('#wl_due_dt').val()))
+	 	if (!(f.wl_due_dt.value.blank()) && !datere.test(f.wl_due_dt.value))
 	 		err += ' - Due date is not valid (mm/dd/yyyy)<br>';
 		return err;
 	},
@@ -1211,37 +1266,45 @@ var wdb = // setup the wdb namespace
 	worklogCancelDialog: function ( event )
 	{
 		$('#worklog_form').dialog('close');
-		wdb.worklog_show(event);
+		//wdb.worklog_show(event);
 	},
 
-	worklog_show: function ( event, data )
+	worklog_show: function ( event )
 	{
-		//$('#worklog_div').empty();
-		$('#worklog_div').html('No Worklog entries'); return false;
-		var div = $('#worklog_div');
-		if (!data.worklog || data.worklog.length == 0)
-			div.html('No worklog records');
-		else
+		$('#worklog_div').empty();
+		var params = "action=showem";
+		$.ajax({
+			url: 'get_worklog_entries',
+			type: 'get',
+			data: params,
+			dataType: 'json'
+		}).done(function (data)
 		{
-			var tbl = $('<table></table>');
-			div.append(tbl);
-			var wl = data.worklog;
-			for (var x=0; x<wl.length; ++x)
-			{
-			    var uname = wdb.group_data.users[wl[x].user_nm] ? wdb.group_data.users[wl[x].user_nm].name : 'n/a';
-				var tr = $('<tr><th>Date/Time: '+wl[x].edtm+' by '+uname+'</th></tr>');
-				div.append(tr);
-				tr = $('<tr><td>'+wdb.nl2br(wl[x].comments)+'<hr></td></tr>');
-				div.append(tr);
-			}
-		}
-	},
-
-	get_worklog: function (id) {
-		$('#worklogDiv').html("Loading...");
-		//alert("search_list called");
-		$('#worklogDiv').load('mtworklogAjax.php', { id: id });
-		return false;
+			//console.log('worklog_show:',data);
+			out = '<table id="mt_worklog_tbl" class="display" border="1" cellspacing="0" cellpadding="2"><thead><tr><th>Date</th><th>User</th><th>Title</th><th>&nbsp;</th></tr></thead></table>';
+			$('#worklog_div').html(out);
+			var table = $('#mt_worklog_tbl').DataTable({
+	            'data': data.data,
+	            'destroy': true,
+	            'order': [[ 0, "desc" ]],
+	            'columns': [
+	                {'data': 'edtm'},
+	                {'data': 'userid'},
+	                {'data': 'title'},
+	                null
+	            ],
+	            'columnDefs': [ {
+	                'targets': -1,
+	                'data': null,
+	                'defaultContent': '<button>Show</button>'
+	            } ]
+			});
+			$('#mt_worklog_tbl tbody').on( 'click', 'button', function () {
+				var data = table.row( $(this).parents('tr') ).data();
+				//alert( 'user='+data[0]);
+				wdb.show_proj_worklog(event,data._id);
+	        });
+		});
 	},
 
 	//-- utility functions
@@ -2082,9 +2145,9 @@ var wdb = // setup the wdb namespace
 		$('#client_types').empty().append(sel);
 		var sel = wdb.build_selection('status2',data.mt_status);
 		$('#btc_status').empty().append(sel);
-		var sel = wdb.build_selection('catagory',data.mt_category);
+		var sel = wdb.build_selection('wl_category',data.mt_category);
 		$('#wl_category').empty().append(sel);
-		var sel = wdb.build_selection('kind',data.mt_kind);
+		var sel = wdb.build_selection('wl_kind',data.mt_kind);
 		$('#wl_kind').empty().append(sel);
 		if (!/admin/.test(wdb.group_data.roles)) $('#mt_admin_btn').hide();
 		var sel = wdb.build_contact_selection('client');
