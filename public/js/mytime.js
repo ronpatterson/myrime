@@ -1132,13 +1132,14 @@ var wdb = // setup the wdb namespace
 		}).done(function (data)
 		{
 			//console.log(data);
+			$('#wlid_v').val(wlid);
 			$('#wl_title_v').text(data.title);
 			$('#wl_userid_v').html(data.userid);
 			$('#wl_comments_v').text(data.comments);
-			$('#wl_public_v').text(data.public);
-			$('#wl_category_v').text(data.category);
-			$('#wl_kind_v').text(data.kind);
-			$('#wl_billable_v').text(data.billable);
+			$('#wl_public_v').text(data.public_v);
+			$('#wl_category_v').text(data.category_v);
+			$('#wl_kind_v').text(data.kind_v);
+			$('#wl_billable_v').text(data.billable_v);
 			$('#wl_due_dt_v').text(data.duedt);
 			$('#wl_duration_v').text(sprintf('%d:%02d',data.duration.hours,data.duration.mins));
 			$('#wl_start_dtm_v').text(data.sdtm);
@@ -1146,6 +1147,12 @@ var wdb = // setup the wdb namespace
 			$('#wl_edtm_v').text(data.entrydtm);
 		});
 		return true;
+	},
+
+	worklog_show_cancel: function ( event )
+	{
+		$('#worklog_show').dialog('close');
+		//wdb.worklog_show(event);
 	},
 
 	add_worklog: function ( event ) {
@@ -1158,6 +1165,7 @@ var wdb = // setup the wdb namespace
 		wdb.showDialogDiv('MyTime Worklog','worklog_form');
 		$('#wl_form input[name="wl_proj_id"]').val($('#pid').val());
 		$('#wl_proj_cd').html($('#proj_cd2_v').html());
+		$('#wl_form input[name="wlid').val('');
 		$('#wl_form input[type="text"]').val('');
 		$('#wl_form input[name="user_nm"]').val('rlpatter');
 		$('#wl_form textarea[name="wl_comments"]').text('');
@@ -1178,13 +1186,15 @@ var wdb = // setup the wdb namespace
 		return true;
 	},
 
-	edit_worklog: function ( event, wlid ) {
+	edit_worklog: function ( event ) {
 		wdb.showDialogDiv('MyTime Worklog','worklog_form');
+		var wlid = $('#wlid_v').val();
 		$('#wl_form input[name="wl_proj_id"]').val($('#pid').val());
 		$('#wl_proj_cd').html($('#proj_cd2_v').html());
-		var params = "action=show&id="+wlid;
+		$('#wl_form input[name="wlid').val(wlid);
+		var params = "action=show&wlid="+wlid;
 		$.ajax({
-			url: 'mt_get_worklog',
+			url: 'get_worklog',
 			type: 'get',
 			data: params,
 			dataType: 'json'
@@ -1195,20 +1205,21 @@ var wdb = // setup the wdb namespace
 			$('#wl_form input[name="user_nm"]').val(data.usernm);
 			$('#wl_form textarea[name="wl_comments"]').text(data.comments);
 			$('#wl_form input[name="wl_public"]').removeAttr('checked');
-			if (data.public == 'y') $('input[name="wl_public"][value="y"]').prop('checked',true);
-			else $('input[name="wl_public"][value="n"]').prop('checked',true);
+			if (data.public == 'y') $('#wl_form input[name="wl_public"][value="y"]').prop('checked',true);
+			else $('#wl_form input[name="wl_public"][value="n"]').prop('checked',true);
 			$('#wl_form select[name="wl_category"]').val(data.category);
 			$('#wl_form select[name="wl_kind"]').val(data.kind);
 			$('#wl_form input[name="wl_billable"]').removeAttr('checked');
-			if (data.billable == 'y') $('input[name="wl_billable"][value="y"]').prop('checked',true);
-			else $('input[name="wl_billable"][value="n"]').prop('checked',true);
-			$('#wl_form select[name="wl_duration"]').val(data.duration);
+			if (data.billable == 'y') $('#wlform input[name="wl_billable"][value="y"]').prop('checked',true);
+			else $('#wl_form input[name="wl_billable"][value="n"]').prop('checked',true);
+			$('#wl_form input[name="wl_due_dt"]').val(data.duedt);
+			$('#wl_form select[name="wl_duration"]').val(sprintf('%d:%02d',data.duration.hours,data.duration.mins));
 			$('#wl_ename').html(data.usernm);
 			$('#wl_form input[name="wl_start_dt"]').val(data.sdt);
 			$('#wl_form input[name="wl_end_dt"]').val(data.edt);
 			$('#wl_form select[name="wl_start_tm"]').val(data.stm);
 			$('#wl_form select[name="wl_end_tm"]').val(data.etm);
-			$('#wl_entry_dtm').html(edtm);
+			$('#wl_form input[name="wl_entry_dtm"]').html(data.entry_dtm);
 			$('#wl_errors').html('');
 		});
 		return true;
@@ -2094,6 +2105,8 @@ var wdb = // setup the wdb namespace
 		$('#mt_email_form').on('submit',wdb.email_mt);
 		$('#wl_form').on('submit',wdb.workloghandler);
 		$('#cancel2').on('click',wdb.worklogCancelDialog);
+		$('#wl_show_edit').on('click',wdb.edit_worklog);
+		$('#wl_show_cancel').on('click',wdb.worklog_show_cancel);
 		$('#mt_lu_form_id').on('submit',wdb.luhandler);
 		$('#mt_lu_save_cancel').on('click',wdb.lu_save_cancel);
 		$('#mt_user_form_id').on('submit',wdb.userhandler);

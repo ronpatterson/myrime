@@ -17,7 +17,8 @@ const adir = '/usr/local/data/',
     smtp_user = 'ron.patterson%40usa.net',
     smtp_pw = 'xxxx',
     dateFmt1 = 'mm/dd/yyyy h:MM tt',
-    dateFmt2 = 'mm/dd/yyyy';
+    dateFmt2 = 'mm/dd/yyyy',
+    dateFmt3 = 'hh:MM';
 
 var lookups = [];
 
@@ -46,6 +47,49 @@ module.exports = function() {
 
         get_lookups: () => {
             return lookups;
+        },
+
+        check_session: (req, res) => {
+            //console.log('check_session',req.session);
+            if (req.session && (typeof(req.session['user_id']) == 'undefined' || req.session.user_id == '')) {
+                res.send('FAIL');
+            }
+            else {
+                res.json(req.session);
+            }
+            res.end();
+        },
+
+	    login_session: (db, req, res, next) => {
+            //console.log(req.body);
+            var uid = req.body.uid;
+            var pw = req.body.pw;
+            var sess = req.session;
+            db.collection('users')
+            .findOne(
+                { 'uid': uid, 'pw': crypto.createHash('md5').update(req.body.pw).digest("hex") },
+                (err, user) => {
+                    assert.equal(null, err);
+                    if (user === null)
+                    {
+                        sess.destroy();
+                        res.send('FAIL');
+                        res.end();
+                        return;
+                    }
+                    //console.log(user);
+                    sess.user_id = uid;
+                    sess.user_nm = user.lname + ', ' + user.fname;
+                    sess.lname = user.lname;
+                    sess.fname = user.fname;
+                    sess.email = user.email;
+                    sess.roles = user.roles.join(',');
+                    //sess.group = user.bt_group;
+                    sess.save();
+                    res.json(user);
+                    res.end();
+                }
+            );
         },
 
         projList: (db, req, res) => {
@@ -620,7 +664,7 @@ module.exports = function() {
         },
 
         get_worklog: (db, req, res) => {
-            //console.log('get_worklog:',req);
+            console.log('get_worklog:',req);
             var id = req.query.wlid;
             db.collection('worklog')
             .findOne(
@@ -629,13 +673,17 @@ module.exports = function() {
                     assert.equal(null, err);
                     //console.log(doc);
                     //doc.edtm = date("m/d/Y g:i a",doc.entry_dtm);
-                    doc.public = doc.public == 'y' ? 'Yes' : 'No';
-                    doc.billable = doc.billable == 'y' ? 'Yes' : 'No';
+                    doc.public_v = doc.public == 'y' ? 'Yes' : 'No';
+                    doc.billable_v = doc.billable == 'y' ? 'Yes' : 'No';
                     doc.duedt = dateFormat(doc.due_date,dateFmt2);
-                    doc.category = getWDDlookup("mt_category",doc.category);
-                    doc.kind = getWDDlookup("mt_kind",doc.kind);
+                    doc.category_v = getWDDlookup("mt_category",doc.category);
+                    doc.kind_v = getWDDlookup("mt_kind",doc.kind);
                     doc.sdtm = dateFormat(doc.start_dtm,dateFmt1);
+                    doc.sdt = dateFormat(doc.start_dtm,dateFmt2);
+                    doc.stm = dateFormat(doc.start_dtm,dateFmt3);
                     doc.edtm = dateFormat(doc.end_dtm,dateFmt1);
+                    doc.edt = dateFormat(doc.end_dtm,dateFmt2);
+                    doc.etm = dateFormat(doc.end_dtm,dateFmt3);
                     doc.entrydtm = dateFormat(doc.entry_dtm,dateFmt1);
                     console.log(doc);
                     res.json(doc);
@@ -663,18 +711,36 @@ module.exports = function() {
 , "end_dtm": new Date(req.body.wl_end_dt + ' ' + req.body.wl_end_tm)
 , "entry_dtm": new Date()
 };
-            //console.log(bug,doc); res.end('SUCCESS'); return;
-            var rec = db.collection('worklog')
-            .insertOne(
-                doc,
-                (err, result) => {
-                    assert.equal(err, null);
-                    console.log("Inserted into the worklog collection.");
-                    //console.log(result);
-                    res.send('SUCCESS');
-                    res.end();
-                }
-            )
+            //console.log('worklog_add_edit:',doc); res.end('SUCCESS'); return;
+            if (id == '') // add
+            {
+                var rec = db.collection('worklog')
+                .insertOne(
+                    doc,
+                    (err, result) => {
+                        assert.equal(err, null);
+                        console.log("Inserted into the worklog collection.");
+                        //console.log(result);
+                        res.send('SUCCESS');
+                        res.end();
+                    }
+                )
+            }
+            else { //update
+                doc.entry_dtm = new Date(req.body.wl_entry_dtm);
+                var rec = db.collection('worklog')
+                .updateOne(
+                    { '_id' : new ObjectId(id) },
+                    { '$set' : doc },
+                    (err, result) => {
+                        assert.equal(err, null);
+                        console.log("Updated the worklog collection.");
+                        //console.log(result);
+                        res.send('SUCCESS');
+                        res.end();
+                    }
+                )
+            }
         },
 
         assign_user: (db, req, res, next) => {
