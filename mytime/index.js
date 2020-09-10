@@ -169,6 +169,10 @@ module.exports = function() {
                         proj.attachments[i].edtm = typeof(proj.attachments[i].entry_dtm) == 'undefined' ? '' : dateFormat(proj.attachments[i].entry_dtm,dateFmt1);
                     }
                 }
+                proj.notes.forEach((note, i) => {
+                    proj.notes[i].edt = dateFormat(note.entry_dtm,dateFmt2);
+                });
+
                 //console.log(proj);
                 res.json(proj);
                 res.end();
@@ -664,7 +668,7 @@ module.exports = function() {
         },
 
         get_worklog: (db, req, res) => {
-            console.log('get_worklog:',req);
+            //console.log('get_worklog:',req);
             var id = req.query.wlid;
             db.collection('worklog')
             .findOne(
@@ -685,7 +689,7 @@ module.exports = function() {
                     doc.edt = dateFormat(doc.end_dtm,dateFmt2);
                     doc.etm = dateFormat(doc.end_dtm,dateFmt3);
                     doc.entrydtm = dateFormat(doc.entry_dtm,dateFmt1);
-                    console.log(doc);
+                    //console.log(doc);
                     res.json(doc);
                     res.end();
                 }
