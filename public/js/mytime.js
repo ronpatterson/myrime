@@ -202,7 +202,7 @@ var wdb = // setup the wdb namespace
 
     mtprojadd: function ( event )
     {
-        wdb.showDialogDiv('WDD MyTime Project Add','projedit_div');
+        wdb.showDialogDiv('WDD MyTime Project Add','project_show_edit');
         $('#projedit_errors').html('');
         $('#pid').val('');
         $('#projedit_form1 input[type="text"]').val('');
@@ -214,8 +214,8 @@ var wdb = // setup the wdb namespace
         $('#projedit_form1 input[name="mileage_rate"]').val('0.0');
         $('#projedit_form1 input[name="distance"]').val('0');
         $('.projdate').val('');
-        $('#mtshow_div').hide();
-        $('#mtedit_div').show();
+        $('#projshow_div').hide();
+        $('#projedit_div').show();
         return false;
     },
 
@@ -1824,7 +1824,7 @@ var wdb = // setup the wdb namespace
     mtCancelDialog: function ( event )
     {
         if ($('#mtedit_id').text() == '')
-            $('#mt_proj_show_edit').dialog('close');
+            $('#project_show_edit').dialog('close');
         else
         {
             $('#mtshow_div').show();
