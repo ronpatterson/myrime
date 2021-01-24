@@ -378,7 +378,7 @@ module.exports = function() {
                     assert.equal(null, err);
                     contact.edtm = dateFormat(contact.entry_dtm,dateFmt1);
                     contact.udtm = typeof(contact.update_dtm) == 'undefined' ? '' : dateFormat(contact.update_dtm,dateFmt1);
-                    contact.email = '<a href="mailto:' + contact.email + '">' + contact.email + '</a>';
+                    contact.email_link = '<a href="mailto:' + contact.email + '">' + contact.email + '</a>';
                     //console.log(contact);
                     res.json(contact);
                     res.end();

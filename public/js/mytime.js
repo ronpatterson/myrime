@@ -541,7 +541,7 @@ var wdb = // setup the wdb namespace
             $('#lname_v').html(data.lname);
             $('#fname_v').html(data.fname);
             $('#cid').val(id);
-            $('#email_v').html(data.email);
+            $('#email_v').html(data.email_link);
             $('#addr_number_v').html(data.address.number);
             $('#addr_street_v').html(data.address.street);
             $('#addr_city_v').html(data.address.city);
@@ -2073,6 +2073,15 @@ var wdb = // setup the wdb namespace
             if (typeof(div) != 'undefined') div.show();
         }
         return false;
+    },
+
+    print_project: function ( proj )
+    {
+        let newWin = window.open("about:blank", "printme");
+
+        newWin.document.write(
+          "<script>window.opener.document.body.innerHTML = 'Test'<\/script>"
+        );
     },
 
     init: function ( )
