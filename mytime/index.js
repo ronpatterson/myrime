@@ -163,7 +163,7 @@ module.exports = function() {
                 proj.edtm = dateFormat(proj.entry_dtm,dateFmt1);
                 proj.ddt = typeof(proj.dates.due) == 'undefined' || !proj.dates.due ? '' : dateFormat(proj.dates.due,dateFmt2);
                 proj.sdt = typeof(proj.dates.started) == 'undefined' || !proj.dates.started ? '' : dateFormat(proj.dates.started,dateFmt2);
-                proj.cdtm = typeof(proj.dates.completed) == 'undefined' || !proj.dates.completed ? '' : dateFormat(proj.dates.completed,dateFmt2);
+                proj.cdt = typeof(proj.dates.completed) == 'undefined' || !proj.dates.completed ? '' : dateFormat(proj.dates.completed,dateFmt2);
                 if (typeof(proj.attachments) != 'undefined') {
                     for (var i=0; i<proj.attachments.length; ++i) {
                         proj.attachments[i].edtm = typeof(proj.attachments[i].entry_dtm) == 'undefined' ? '' : dateFormat(proj.attachments[i].entry_dtm,dateFmt1);

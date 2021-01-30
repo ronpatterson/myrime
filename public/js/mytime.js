@@ -402,6 +402,50 @@ var wdb = // setup the wdb namespace
         return false;
     },
 
+    print_project: function ( event )
+    {
+        let newWin = window.open("about:blank", "printproj");
+
+        // newWin.document.write(
+        //   //"<script>window.opener.document.body.innerHTML = 'Test'<\/script>"
+        //   "<h2>Some Test</h2>"
+        // );
+        var params = "action=print&id="+$('#pid').val();
+        $.ajax({
+            url: 'mt_get_proj',
+            type: 'get',
+            data: params,
+            dataType: 'json'
+        }).done(function (data)
+        {
+            //console.log(data);
+            let html = '<style>@media print { button { visibility: hidden; } }</style>\n\n';
+            html += "<pre>Project ID: " + data.proj_cd + '\n';
+            html += 'Client: ' + data.client_name + '\n';
+            html += 'Project Name: ' + data.name + '\n';
+            html += 'PO Number: ' + data.po_nbr + '\n';
+            html += 'Status: ' + data.status_descr + '\n';
+            html += 'Priority: ' + data.priority_descr + '\n';
+            html += 'Description: ' + data.description + '\n';
+            html += 'Hourly Rate: ' + data.hourly_rate + '\n';
+            html += 'Mileage Rate: ' + data.mileage_rate + '\n';
+            html += 'Distance: ' + data.distance + '\n';
+            html += 'Entry Date/Time: ' + data.edtm + '\n';
+            html += 'Due Date: ' + data.ddt + '\n';
+            html += 'Started Date: ' + data.sdt + '\n';
+            html += 'Completed Date: ' + data.cdt + '\n';
+            html += 'Owner: ' + data.user_id + '\n';
+            html += '\nProject Notes:\n';
+            data.notes.forEach((note, i) => {
+                html += data.notes[i].edt + ' by ' + data.notes[i].user_nm + '\n';
+                html += data.notes[i].comments + '\n\n';
+            });
+            html += '</pre><button type="button" onclick="return window.print();">Print</button>';
+            newWin.document.write( html );
+        });
+        return false;
+    },
+
     //-- contacts support functions
 
     mtcontacts: function ( event )
@@ -2073,15 +2117,6 @@ var wdb = // setup the wdb namespace
             if (typeof(div) != 'undefined') div.show();
         }
         return false;
-    },
-
-    print_project: function ( proj )
-    {
-        let newWin = window.open("about:blank", "printme");
-
-        newWin.document.write(
-          "<script>window.opener.document.body.innerHTML = 'Test'<\/script>"
-        );
     },
 
     init: function ( )
