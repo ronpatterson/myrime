@@ -402,6 +402,8 @@ var wdb = // setup the wdb namespace
         return false;
     },
 
+    // TODO: add worklog entries to print (complete)
+    // TODO: add html formatting (complete)
     print_project: function ( event )
     {
         let newWin = window.open("about:blank", "printproj");
@@ -419,29 +421,63 @@ var wdb = // setup the wdb namespace
         }).done(function (data)
         {
             //console.log(data);
-            let html = '<style>@media print { button { visibility: hidden; } }</style>\n\n';
-            html += "<pre>Project ID: " + data.proj_cd + '\n';
-            html += 'Client: ' + data.client_name + '\n';
-            html += 'Project Name: ' + data.name + '\n';
-            html += 'PO Number: ' + data.po_nbr + '\n';
-            html += 'Status: ' + data.status_descr + '\n';
-            html += 'Priority: ' + data.priority_descr + '\n';
-            html += 'Description: ' + data.description + '\n';
-            html += 'Hourly Rate: ' + data.hourly_rate + '\n';
-            html += 'Mileage Rate: ' + data.mileage_rate + '\n';
-            html += 'Distance: ' + data.distance + '\n';
-            html += 'Entry Date/Time: ' + data.edtm + '\n';
-            html += 'Due Date: ' + data.ddt + '\n';
-            html += 'Started Date: ' + data.sdt + '\n';
-            html += 'Completed Date: ' + data.cdt + '\n';
-            html += 'Owner: ' + data.user_id + '\n';
-            html += '\nProject Notes:\n';
+            var html = '<style>@media print { button { visibility: hidden; } } th { text-align: left }</style>\n\n';
+            html += '<button type="button" onclick="return window.print();">Print</button>';
+            html += "<table>\n";
+            html += "<tr><th>Project ID: </th><td>" + data.proj_cd + '</td></tr>\n';
+            html += '<tr><th>Client: </th><td>' + data.client_name + '</td></tr>\n';
+            html += '<tr><th>Project Name: </th><td>' + data.name + '</td></tr>\n';
+            html += '<tr><th>PO Number: </th><td>' + data.po_nbr + '</td></tr>\n';
+            html += '<tr><th>Status: </th><td>' + data.status_descr + '</td></tr>\n';
+            html += '<tr><th>Priority: </th><td>' + data.priority_descr + '</td></tr>\n';
+            html += '<tr><th>Description: </th><td>' + data.description + '</td></tr>\n';
+            html += '<tr><th>Hourly Rate: </th><td>' + data.hourly_rate + '</td></tr>\n';
+            html += '<tr><th>Mileage Rate: </th><td>' + data.mileage_rate + '</td></tr>\n';
+            html += '<tr><th>Distance: </th><td>' + data.distance + '</td></tr>\n';
+            html += '<tr><th>Entry Date/Time: </th><td>' + data.edtm + '</td></tr>\n';
+            html += '<tr><th>Due Date: </th><td>' + data.ddt + '</td></tr>\n';
+            html += '<tr><th>Started Date: </th><td>' + data.sdt + '</td></tr>\n';
+            html += '<tr><th>Completed Date: </th><td>' + data.cdt + '</td></tr>\n';
+            html += '<tr><th>Owner: </th><td>' + data.user_id + '</td></tr>\n';
+            html += '<tr><th>Project Notes:</td></tr>\n';
             data.notes.forEach((note, i) => {
-                html += data.notes[i].edt + ' by ' + data.notes[i].user_nm + '\n';
-                html += data.notes[i].comments + '\n\n';
+                html += '<tr><td colspan="2">' + note.edt + ' by ' + note.user_nm + '</br>\n';
+                html += note.comments + '</td></tr>\n';
             });
-            html += '</pre><button type="button" onclick="return window.print();">Print</button>';
+            html += "</table>\n";
             newWin.document.write( html );
+            var params = "action=showem&id="+$('#pid').val();
+            $.ajax({
+                url: 'get_worklog_entries',
+                type: 'get',
+                data: params,
+                dataType: 'json'
+            }).done(function (data)
+            {
+                // console.log('worklog_show:',data);
+                let html = '<b>Project Worklog:</b>\n';
+                //html += '<tr><td colspan="2">' + JSON.stringify(data) + '</td></tr>\n'
+                html += '<table border="1" cellspacing="0" cellpadding="2"><thead><tr><th>Date</th><th>User</th><th>Public</th><th>Category</th><th>Kind</th><th>Billable</th></tr></thead>\n';
+                data.data.forEach((wl, i) => {
+                    // console.log('worklog_show:',wl);
+                    html += '<tr><td>' + wl.entrydtm + '</td>\n';
+                    html += '<td>' + wl.userid + '</td>\n';
+                    html += '<td>' + wl.public + '</td>\n';
+                    html += '<td>' + wl.category + '</td>\n';
+                    html += '<td>' + wl.kind + '</td>\n';
+                    html += '<td>' + wl.billable + '</td>\n';
+                    html += '</tr>';
+                    html += '<tr><td colspan="6"><b>Title: </b>' + wl.title + '<br>\n';
+                    html += '<b>Comments: </b>' + wl.comments + '<br>\n';
+                    html += '<b>Due Date: </b>' + wl.duedt + '<br>\n';
+                    html += '<b>Duration: </b>' + wl.duration.hours + ':' + wl.duration.mins + '<br>\n';
+                    html += '<b>Start: </b>' + wl.sdtm + '<br>\n';
+                    html += '<b>End: </b>' + wl.edtm + '<br>\n';
+                    html += '</td></tr>\n';
+                });
+                html += '</table>';
+                newWin.document.write( html );
+            });
         });
         return false;
     },
@@ -1328,7 +1364,7 @@ var wdb = // setup the wdb namespace
     worklog_show: function ( event )
     {
         $('#worklog_div').empty();
-        var params = "action=showem";
+        var params = "action=showem&id="+$('#pid').val();
         $.ajax({
             url: 'get_worklog_entries',
             type: 'get',
@@ -1344,7 +1380,7 @@ var wdb = // setup the wdb namespace
                 'destroy': true,
                 'order': [[ 0, "desc" ]],
                 'columns': [
-                    {'data': 'edtm'},
+                    {'data': 'entrydtm'},
                     {'data': 'userid'},
                     {'data': 'title'},
                     null

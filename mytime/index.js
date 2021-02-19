@@ -647,16 +647,25 @@ module.exports = function() {
         get_worklog_entries: (db, req, res) => {
             //console.log('contacts_list',req);
             var results = [];
-            var crit = {};
+            var crit = { 'project': ObjectId(req.query.id) };
             var cursor = db.collection('worklog').find(crit);
             cursor.sort({'entry_dtm':-1});
             cursor.forEach((doc) => {
                 //console.log(doc);
                 //doc.edtm = date("m/d/Y g:i a",doc.entry_dtm);
-                doc.edtm = dateFormat(doc.entry_dtm,dateFmt2);
+                //doc.edtm = dateFormat(doc.entry_dtm,dateFmt2);
                 doc.public = doc.public == 'y' ? 'Yes' : 'No';
                 doc.billable = doc.billable == 'y' ? 'Yes' : 'No';
-                //doc.status = getWDDlookup("status",doc.status);
+                doc.duedt = dateFormat(doc.due_date,dateFmt2);
+                doc.category = getWDDlookup("mt_category",doc.category);
+                doc.kind = getWDDlookup("mt_kind",doc.kind);
+                doc.sdtm = dateFormat(doc.start_dtm,dateFmt1);
+                doc.sdt = dateFormat(doc.start_dtm,dateFmt2);
+                doc.stm = dateFormat(doc.start_dtm,dateFmt3);
+                doc.edtm = dateFormat(doc.end_dtm,dateFmt1);
+                doc.edt = dateFormat(doc.end_dtm,dateFmt2);
+                doc.etm = dateFormat(doc.end_dtm,dateFmt3);
+                doc.entrydtm = dateFormat(doc.entry_dtm,dateFmt1);
                 results.push(doc);
             }, (err) => {
                 assert.equal(null, err);
@@ -769,6 +778,7 @@ module.exports = function() {
             )
         },
 
+        // TODO: modifications for mytime project
         proj_email: (db, req, res, next) => {
             //console.log(req.body); res.end('TEST'); return;
             var id = req.body.id;
