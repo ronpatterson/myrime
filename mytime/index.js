@@ -5,8 +5,10 @@
 'use strict';
 
 // load required modules
-const ObjectId = require('mongodb').ObjectID,
-    fs = require('fs'),
+//import dateFormat from 'dateformat';
+const ObjectId = require('mongodb-legacy').ObjectId,
+    //fs = require('fs'),
+    //dateFormat = (...args) => //import('dateformat').then(({default: dateformat}) => dateformat(...args)),
     dateFormat = require('dateformat'),
     crypto = require('crypto'),
     mailer = require("nodemailer"),
@@ -647,7 +649,7 @@ module.exports = function() {
         get_worklog_entries: (db, req, res) => {
             //console.log('contacts_list',req);
             var results = [];
-            var crit = { 'project': ObjectId(req.query.id) };
+            var crit = { 'project': new ObjectId(req.query.id) };
             var cursor = db.collection('worklog').find(crit);
             cursor.sort({'entry_dtm':-1});
             cursor.forEach((doc) => {

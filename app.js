@@ -5,11 +5,21 @@
 'use strict';
 
 // load required modules
+//import express from 'express';
+//import session from 'express-session';
+//import fileUpload from 'express-fileupload';
+//import MongoClient from 'mongodb';
+//import engines from 'consolidate';
+//import bodyParser from 'body-parser';
+//import path from 'path';
+//import assert from 'assert';
+//import mytime from './public/js//mytime.cjs';
+//import sprintf from 'sprintf-js';
 const express = require('express'),
     app = express(),
     session = require('express-session'),
     fileUpload = require('express-fileupload'),
-    MongoClient = require('mongodb').MongoClient,
+    MongoClient = require('mongodb-legacy').MongoClient,
     engines = require('consolidate'),
     bodyParser = require('body-parser'),
     path = require("path"),
@@ -17,7 +27,8 @@ const express = require('express'),
     mytime = require('./mytime'),
     sprintf = require('sprintf-js').sprintf,
     wdb = new mytime();
-const MongoDBStore = require('connect-mongo')(session);
+//const MongoDBStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 
 // globals
 const mongo_host =
@@ -77,11 +88,11 @@ function app_init (db, req, res) {
     app.use(session({
         //secret: process.env.SESSION_SECRET,
         secret: 'wd_mytime_sess_cd',
-        store: new MongoDBStore(
+        store: new MongoStore(
         {
             db: db,
-            url: dbLink,
-            collection: 'mySessions'
+            mongoUrl: dbLink,
+            collectionName: 'mySessions'
         }),
         cookie: { },
         maxAge: 2 * 24 * 60 * 60 * 1000,
@@ -91,6 +102,7 @@ function app_init (db, req, res) {
     app_lu_init(db, req, res);
 }
 
+console.log('DB connect');
 MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
     assert.equal(null, err);
     console.log("Successfully connected to MongoDB.");
@@ -246,3 +258,4 @@ MongoClient.connect(dbLink, { useUnifiedTopology: true }, (err, client) => {
     });
 
 }); // MongoClient.connect
+console.log('here');
